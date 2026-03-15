@@ -72,6 +72,8 @@
                     <!-- company Form start here -->
                     <form action="<?= base_url('company-registeration-data') ?>" name="companyForm" id="companyForm"
                         method="post">
+                        <!-- SECURITY FIX: Add CSRF token to form -->
+                        <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                         <div class="inputs mt-10">
                             <label for="comName">Company Name</label>
                             <input type="text" name="comName" id="comName" placeholder="Enter Company Name" />
@@ -111,6 +113,8 @@
                     <!-- user Form start here -->
                     <form action="<?=base_url('user-registeration-data')?>" name="userForm" id="userForm" method="post"
                         style="display: none">
+                        <!-- SECURITY FIX: Add CSRF token to form -->
+                        <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                         <div class="inputs mt-10">
                             <label for="usrName">User Name</label>
                             <input type="text" name="usrName" id="usrName" placeholder="Enter User Name" />

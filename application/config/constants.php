@@ -11,7 +11,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | of this setting
 |
 */
-defined('SHOW_DEBUG_BACKTRACE') OR define('SHOW_DEBUG_BACKTRACE', TRUE);
+// Show debug backtraces only in non-production environments
+defined('SHOW_DEBUG_BACKTRACE') OR define(
+    'SHOW_DEBUG_BACKTRACE',
+    (ENVIRONMENT !== 'production')
+);
 
 /*
 |--------------------------------------------------------------------------

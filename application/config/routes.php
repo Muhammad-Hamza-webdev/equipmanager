@@ -73,7 +73,10 @@ $route['workforce-detail']='welcome/WorkforceDetailMarketPlace';
 $route['contact-form-data']='welcome/ContactFormData';
 
 //dashboards
+$route['user-dashboard'] = 'welcome/userDashboard';
+$route['settings'] = 'welcome/userSettings';
 $route['company-dashboard'] = 'welcome/companyDashboard';
+$route['manager-dashboard'] = 'welcome/managerDashboard';
 
 
 //manage workforce company
@@ -217,15 +220,56 @@ $route['mark-listing-approved']='superadmin/MarketplaceListingMarkedApproved';
 $route['mark-listing-rejected']='superadmin/MarketplaceListingMarkedRejected';
 $route['change-website-listing-status/:any/:any']='superadmin/ChangeMarketplacelistingWebsiteStatus';
 
+// Super admin orders route
+$route['super-admin-orders'] = 'superadmin/all_orders';
+$route['super-admin-orders/view/(:num)'] = 'superadmin/view_order/$1';
 
 $route['login-data'] = 'welcome/LoginData';
 
 
 //website mode change
 $route['change-website-mode']='superadmin/changeWebsiteMode';
+//system settings
+$route['manage-system-settings']='superadmin/manageSystemSettings';
+$route['update-system-settings']='superadmin/updateSystemSettings';
 //test email
 $route['test-mail'] = 'welcome/TestMail';
 
+// Checkout route (secure checkout page)
+$route['checkout'] = 'checkout/index';
+$route['checkout/pay/(:any)'] = 'checkout/pay_with_token/$1';
+$route['checkout/(:any)'] = 'checkout/$1';
+
+// Chat routes (order-based messaging system)
+$route['chats'] = 'chats/index';
+$route['chats/(:any)'] = 'chats/$1';
+$route['chat/debug/(:num)'] = 'chat/debug/$1';
+$route['chat/(:num)'] = 'chat/view/$1';
+$route['chat/api/(:any)'] = 'chat/api_$1';
+
+// Company admin chat routes (admin layout)
+$route['company-chats/view/(:num)'] = 'chat/company_view/$1';
+$route['company-chats'] = 'chats/index';
+$route['company-chats/(:any)'] = 'chats/$1';
+
+// Orders routes (user order history and details)
+$route['orders'] = 'orders/index';
+$route['orders/confirm_delivery'] = 'orders/confirm_delivery';
+$route['orders/(:num)'] = 'orders/view/$1';  // Route numeric IDs to view method: /orders/21 → orders/view/21
+$route['orders/(:alpha)'] = 'orders/$1';     // Route method names like test_session
+$route['dashboard/orders'] = 'orders/index';
+$route['dashboard/orders/(:num)'] = 'orders/view/$1';  // Numeric IDs to view
+$route['dashboard/orders/(:alpha)'] = 'orders/$1';     // Method names
+
+// Company Orders routes (admin approval dashboard for purchase requests)
+$route['company-orders'] = 'company_orders/index';
+$route['company-orders/view/(:num)'] = 'company_orders/view/$1';
+$route['company-orders/accept'] = 'company_orders/accept';
+$route['company-orders/reject'] = 'company_orders/reject';
+$route['company-orders/mark_shipped'] = 'company_orders/mark_shipped';
+$route['company-orders/allow_pickup'] = 'company_orders/allow_pickup';
+
+$route['orders/confirm_pickup'] = 'orders/confirm_pickup';
 
 $route['logout'] = 'welcome/LogOut';
 $route['default_controller'] = 'welcome';

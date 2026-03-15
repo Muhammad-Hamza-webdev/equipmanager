@@ -68,6 +68,8 @@
             <span>Subscribe Our Newsletter</span>
             <div class="sub_email">
               <form action="" method="post">
+                <!-- SECURITY FIX: Add CSRF token to form -->
+                <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                 <input
                   type="email"
                   name="email"

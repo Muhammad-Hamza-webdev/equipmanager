@@ -1,0 +1,1 @@
+Changed the DB port to 3307, if someone is using the default 3306, they can go to the database config file and change it.

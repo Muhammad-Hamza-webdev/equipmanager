@@ -71,6 +71,8 @@
                 <h6 class="mb-0 text-uppercase">Add workforce</h6>
                 <hr />
                 <form class="row g-3" method="post" action="<?= base_url('add-work-force-data') ?>" enctype="multipart/form-data">
+                  <!-- SECURITY FIX: Add CSRF token to form -->
+                  <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                   <div class="col-12">
                     <label class="form-label">Person Name</label>
                     <input
@@ -98,7 +100,7 @@
                     <select class="multiple-select" id="personSkill" name="personSkill[]" data-placeholder="Choose anything" multiple="multiple">
                       <option value="">Select Skill</option>
                       <?php
-                      if (!empty($skills)) {
+                      if (!empty($skills) && is_array($skills)) {
                         foreach ($skills as $skill) {
                       ?>
                           <option value="<?= $skill['skillID'] ?>"><?= $skill['skillName'] ?></option>
@@ -308,7 +310,8 @@
           type: 'POST', // HTTP method
           data: {
             skillName: skillName,
-            skillDescription: skillDescription
+            skillDescription: skillDescription,
+            '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
           }, // Data to send
 
           success: function(response) {

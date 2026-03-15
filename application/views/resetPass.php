@@ -30,7 +30,8 @@
         <div class="containers">
             <div class="inner-login">
                 <form method="post" class="form"
-                    action="<?= base_url('reset-password-data?userID='.$_GET['userID'].'&auth='.$_GET['auth']) ?>">
+                    action="<?= base_url('reset-password-data?userID='.urlencode($_GET['userID']).'&auth='.urlencode($_GET['auth'])) ?>">
+                    <?= csrf_field() ?>
                     <div class="main-box">
                         <div class="img">
                             <svg width="72" height="72" viewBox="0 0 72 72" fill="none"

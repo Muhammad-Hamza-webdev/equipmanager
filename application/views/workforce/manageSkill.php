@@ -65,6 +65,8 @@
           <div class="card">
             <div class="card-body">
               <form action="<?= base_url('add-skill-data') ?>" method="post">
+                <!-- SECURITY FIX: Add CSRF token to form -->
+                <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                 <div class="border p-4 rounded">
                   <div class="card-title d-flex align-items-center">
                     <h5 class="mb-0">Add New Skill</h5>
@@ -125,7 +127,7 @@
               </thead>
               <tbody>
                 <?php
-                if (!empty($skills)) {
+                if (!empty($skills) && is_array($skills)) {
                   foreach ($skills as $skill) {
                 ?>
                     <tr>
@@ -169,6 +171,8 @@
                                           </div>
                                           <hr />
                                           <form action="<?=base_url('update-skill-data/'.$skill['skillID'])?>" method="post">
+                                            <!-- SECURITY FIX: Add CSRF token to form -->
+                                            <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                                           <div class="row mb-3">
                                             <label
                                               for="skillName"

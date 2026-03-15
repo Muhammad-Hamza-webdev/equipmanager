@@ -38,6 +38,22 @@
 
   <title>Marketplace Listing</title>
   <style>
+    /* Force tooltips to stay centered on top */
+    .tooltip-inner {
+      transform: translateX(-50%) !important;
+      left: 50% !important;
+    }
+
+    /* Hide all tooltip arrows */
+    .tooltip-arrow {
+      display: none !important;
+    }
+
+    .bs-tooltip-top .tooltip-arrow,
+    .bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow {
+      display: none !important;
+    }
+
     .width-ctrl {
       --width: 25%;
     }
@@ -97,7 +113,7 @@
               <!-- Btn -->
               <div class="multi_tabs-btn 
                 
-                width-ctrl">
+                width-ctrl" data-bs-toggle="tooltip" data-bs-placement="top" title="Listing Type">
                 <div class="tab-progress-bar"></div>
                 <button class="tab-btn">
                    <?php
@@ -120,7 +136,7 @@
               <!-- Btn -->
               <div class="multi_tabs-btn 
                 
-                width-ctrl">
+                width-ctrl" data-bs-toggle="tooltip" data-bs-placement="top" title="Listing Details">
                 <div class="tab-progress-bar"></div>
                 <button class="tab-btn">
                   <?php
@@ -141,7 +157,7 @@
                 </button>
               </div>
               <!-- Btn -->
-              <div class="multi_tabs-btn active_tab" style="--width: 50%">
+              <div class="multi_tabs-btn active_tab" style="--width: 50%" data-bs-toggle="tooltip" data-bs-placement="top" title="Terms & Conditions">
                 <div class="tab-progress-bar"></div>
                 <button class="tab-btn">
                   <span class="_circle">Step 3</span>
@@ -168,7 +184,8 @@
                     <div class="border p-3 rounded">
                       <h6 class="mb-0 text">Rental terms</h6>
                       <hr />
-                      <form class="row g-3" method="post" action="<?= base_url('add-step-3-data/?listingID=' . $_GET['listingID']) ?>">
+                      <form class="row g-3" method="post" action="<?= base_url('add-step-3-data/?listingID=' . urlencode($_GET['listingID'])) ?>">
+                        <?= csrf_field() ?>
                         <?php
                         if (isset($_GET['edit'])) {
                         ?>
@@ -348,6 +365,17 @@
   <script src="<?= base_url() ?>assets/js/app.js"></script>
   <script src="<?= base_url() ?>assets/js/step.js"></script>
   <script src="<?= base_url() ?>assets/toastr/toastr.min.js"></script>
+  <!-- Initialize Bootstrap Tooltips -->
+  <script>
+    $(document).ready(function() {
+      $('[data-bs-toggle="tooltip"]').tooltip({
+        placement: 'top',
+        fallbackPlacements: [],
+        container: 'body',
+        delay: { show: 100, hide: 50 }
+      });
+    });
+  </script>
   <script>
     // Initialize popover for setRules - trigger on hover
     const setRulesElement = document.getElementById('setRules');

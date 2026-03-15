@@ -63,8 +63,10 @@
                 <h6 class="mb-0 text-uppercase">Add Equipment</h6>
                 <hr />
                 <form class="row g-3" method="post" action="<?= base_url('add-equipment-data') ?>" enctype="multipart/form-data">
+                  <!-- SECURITY FIX: Add CSRF token to form -->
+                  <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                   <div class="col-12">
-                    <label class="form-label">Equipment Name</label>
+                    <label class="form-label">Equipment Name <span data-bs-toggle="tooltip" title="Give the equipment a clear and recognizable name. This helps identify specific tools or assets across the system and improves searchability.">ⓘ</span></label>
                     <input
                       type="text"
                       id="equipName"
@@ -75,7 +77,7 @@
                   </div>
                   <div class="col-12">
                     <div class="d-flex align-items-center gap-20 mb-3">
-                      <label class="form-label mb-0"> Equipment Category</label>
+                      <label class="form-label mb-0">Equipment Category <span data-bs-toggle="tooltip" title="Select the category that best describes the equipment. This helps organize and improves filtering in the inventory system.">ⓘ</span></label>
 
                       <!-- Button trigger modal -->
                       <button
@@ -104,11 +106,11 @@
                     </select>
                   </div>
                   <div class="col-12">
-                    <label class="form-label">Upload Image</label>
+                    <label class="form-label">Upload Image <span data-bs-toggle="tooltip" title="Upload a clear image of the equipment. High-quality images help with identification and increase trust in the inventory.">ⓘ</span></label>
                     <input type="file" name="equipImg" id="equipImg" class="form-control" />
                   </div>
                   <div class="col-12">
-                    <label class="form-label">Quantity</label>
+                    <label class="form-label">Quantity <span data-bs-toggle="tooltip" title="Enter the total number of units available for this equipment. Only enter numbers (e.g., 1, 3, 10).">ⓘ</span></label>
                     <input
                       type="number"
                       class="form-control"
@@ -283,7 +285,8 @@
           type: 'POST', // HTTP method
           data: {
             catDesc: catDesc,
-            catName: catName
+            catName: catName,
+            '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
           }, // Data to send
 
           success: function(response) {

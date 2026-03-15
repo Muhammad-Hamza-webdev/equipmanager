@@ -36,6 +36,7 @@
         }
         ?>
                 <form method="post" class="form" action="<?=  $action_url  ?>">
+                    <?= csrf_field() ?>
                     <div class="main-box">
                         <div class="img">
                             <svg width="72" height="72" viewBox="0 0 72 72" fill="none"

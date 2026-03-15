@@ -46,6 +46,22 @@
       --width: 25%;
     }
 
+    /* Force tooltips to stay centered on top */
+    .tooltip-inner {
+      transform: translateX(-50%) !important;
+      left: 50% !important;
+    }
+
+    /* Hide all tooltip arrows */
+    .tooltip-arrow {
+      display: none !important;
+    }
+
+    .bs-tooltip-top .tooltip-arrow,
+    .bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow {
+      display: none !important;
+    }
+
     @media (max-width: 550px) {
       .width-ctrl {
         --width: 37%;
@@ -135,21 +151,21 @@
           <div class="multi_tabs_btns-container">
             <div class="multi_tabs_btns-wrapper">
               <!-- Btn -->
-              <div class="multi_tabs-btn active_tab width-ctrl" id="step1div">
+              <div class="multi_tabs-btn active_tab width-ctrl" id="step1div" data-bs-toggle="tooltip" data-bs-placement="top" title="Project Overview">
                 <div class="tab-progress-bar"></div>
                 <button class="tab-btn" id="step-1">
                   <span class="_circle">Step 1</span>
                 </button>
               </div>
               <!-- Btn -->
-              <div class="multi_tabs-btn   width-ctrl" id="step2div">
+              <div class="multi_tabs-btn   width-ctrl" id="step2div" data-bs-toggle="tooltip" data-bs-placement="top" title="Resources">
                 <div class="tab-progress-bar"></div>
                 <button class="tab-btn " id="step-2">
                   <span class="_circle">Step 2</span>
                 </button>
               </div>
               <!-- Btn -->
-              <div class="multi_tabs-btn" style="--width: 50%" id="step3div">
+              <div class="multi_tabs-btn" style="--width: 50%" id="step3div" data-bs-toggle="tooltip" data-bs-placement="top" title="Responsibility">
                 <div class="tab-progress-bar"></div>
                 <button class="tab-btn" id="step-3">
                   <span class="_circle">Step 3</span>
@@ -173,8 +189,10 @@
                     <h6 class="mb-0 text">Add General Information</h6>
                     <hr />
                     <form class="row g-3" method="post" id="firstForm" enctype="multipart/form-data">
+                      <!-- SECURITY FIX: Add CSRF token to form -->
+                      <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                       <div class="col-12">
-                        <label class="form-label">Project name</label>
+                        <label class="form-label">Project name <span data-bs-toggle="tooltip" title="Give the project a clear and recognizable name. This helps your team and partners quickly identify the project across equipment, workforce, and tracking. Examples: 'Office renovation – electrical installation' or 'Warehouse expansion – phase 1'">ⓘ</span></label>
                         <input
                           type="text"
                           required
@@ -189,7 +207,7 @@
                           placeholder="Enter Project name" />
                       </div>
                       <div class="col-12">
-                        <label class="form-label">Project category</label>
+                        <label class="form-label">Project category <span data-bs-toggle="tooltip" title="Select the category that best describes the type of work. This helps organize projects and improves filtering and reporting later. Categories: Electrical, Construction, Plumbing, Renovation, Infrastructure">ⓘ</span></label>
                         <select name="pCatID" id="pCatID" required class="form-control">
                           <option value="">select Category</option>
                           <?php
@@ -212,7 +230,7 @@
                         </select>
                       </div>
                       <div class="col-12">
-                        <label class="form-label">Location</label>
+                        <label class="form-label">Location <span data-bs-toggle="tooltip" title="Enter the primary location of the project. This is used to link equipment, workforce, and logistics to the correct site. You can use a city name, site name, or address.">ⓘ</span></label>
                         <input
                           type="text"
                           required
@@ -227,7 +245,7 @@
                           placeholder="Add  Location" />
                       </div>
                       <div class="col-12">
-                        <label class="form-label">Upload Image (Max 10, Optional)</label>
+                        <label class="form-label">Upload Image (Max 10, Optional) <span data-bs-toggle="tooltip" title="Upload relevant files for the project. This can include photos, technical drawings, plans, documents, or other project-related files (Site photos, Technical drawings PDF/DWG, Electrical diagrams, Safety documents, Specifications). These files help create a shared understanding of the project for everyone involved.">ⓘ</span></label>
                         <input type="file" multiple id="pImg" name="pImg[]" class="form-control" />
                         <div id="previewContainer" class="mt-3 d-flex flex-wrap gap-2">
                           <?php
@@ -287,7 +305,7 @@
                         <div class="row">
 
                           <div class="col-md-6 mb-2 mb-md-0">
-                            <span class="text-muted mt-2">Start Date</span>
+                            <span class="text-muted mt-2">Start Date <span data-bs-toggle="tooltip" title="Select the expected start date of the project. This is used for planning availability of equipment and workforce.">ⓘ</span></span>
                             <input
                               type="date"
                               id="pStartDate"
@@ -304,7 +322,7 @@
                           </div>
 
                           <div class="col-md-6">
-                            <span class="text-muted mt-2">End Date</span>
+                            <span class="text-muted mt-2">End Date <span data-bs-toggle="tooltip" title="Select the expected end date of the project. The timeline can be updated later if the project changes.">ⓘ</span></span>
                             <input
                               type="date"
                               id="pEndDate"
@@ -321,7 +339,7 @@
                         </div>
                       </div>
                       <div class="col-12">
-                        <label class="form-label">Description</label>
+                        <label class="form-label">Description <span data-bs-toggle="tooltip" title="Add a description of the project scope, goals, and any important details. The more detailed the description, the better the shared understanding for everyone connected to the project.">ⓘ</span></label>
                         <textarea
                           class="form-control"
                           rows="4"
@@ -371,7 +389,7 @@
                     <form class="row g-3">
                       <div class="col-12">
                         <div class="d-flex align-items-center gap-20 mb-3">
-                          <label class="form-label mb-0">Select Workforce</label>
+                          <label class="form-label mb-0">Select Workforce <span data-bs-toggle="tooltip" title="Select the employees or workforce members who will be assigned to this project. This helps with planning, coordination, and responsibility tracking. You can add or remove workforce members later if the project changes.">ⓘ</span></label>
                         </div>
                         <select name="workforce" id="workforce" onchange="return step2ajax()" class="form-control">
                           <option value="">Select Workforce</option>
@@ -453,7 +471,7 @@
 
                       <div class="col-5">
                         <div class="d-flex align-items-center gap-20 mb-3">
-                          <label class="form-label mb-0">Select Equipment</label>
+                          <label class="form-label mb-0">Select Equipment <span data-bs-toggle="tooltip" title="Select the equipment that will be used for this project. Assigned equipment can be tracked, planned, and linked to availability and usage. You can add or remove equipment later if the project changes.">ⓘ</span></label>
                         </div>
                         <select name="equipment" id="equipment" class="form-control">
                           <option value="">Select Equipment</option>
@@ -502,7 +520,7 @@
                       </div>
                       <div class="col-5">
                         <div class="d-flex align-items-center gap-20 mb-3">
-                          <label class="form-label mb-0">Select Equipment</label>
+                          <label class="form-label mb-0">Quantity <span data-bs-toggle="tooltip" title="Enter only the number of units you want to assign to this project. Only enter numbers (e.g., 1, 3, 10).">ⓘ</span></label>
                         </div>
                         <input type="number" name="qty" id="qty" class="form-control" placeholder="Select equipment first" />
                       </div>
@@ -611,7 +629,7 @@
                       <form class="row g-3">
                         <div class="col-12">
                           <div class="d-flex align-items-center gap-20 mb-3">
-                            <label class="form-label mb-0">Select Employee</label>
+                            <label class="form-label mb-0">Select Employee <span data-bs-toggle="tooltip" title="Select the employee who will be responsible for the assigned equipment.">ⓘ</span></label>
                           </div>
                           <select
                             name="AssignWorkforce"
@@ -641,7 +659,7 @@
                         </div>
                         <div class="col-6">
                           <div class="d-flex align-items-center gap-20 mb-3">
-                            <label class="form-label mb-0">Select Equipment</label>
+                            <label class="form-label mb-0">Select Equipment <span data-bs-toggle="tooltip" title="Select the equipment you want to assign to the selected employee.">ⓘ</span></label>
                           </div>
                           <select
                             name="AssignEquipment"
@@ -669,7 +687,7 @@
 
                         <div class="col-6">
                           <div class="d-flex align-items-center gap-20 mb-3">
-                            <label class="form-label mb-0">Assigning Quantity</label>
+                            <label class="form-label mb-0">Assigning Quantity <span data-bs-toggle="tooltip" title="Enter only the number of units to assign. Don't enter text. Examples: 1, 2, 5">ⓘ</span></label>
                           </div>
                           <input type="number" name="assqty" id="assqty" class="form-control" placeholder="Enter Quantity to assign" />
                         </div>
@@ -793,10 +811,10 @@
   </div>
   <!--end wrapper-->
 
-  <!-- Bootstrap bundle JS -->
-  <script src="<?= base_url() ?>assets/js/bootstrap.bundle.min.js"></script>
   <!--plugins-->
   <script src="<?= base_url() ?>assets/js/jquery.min.js"></script>
+  <!-- Bootstrap bundle JS (Popper included) -->
+  <script src="<?= base_url() ?>assets/js/bootstrap.bundle.min.js"></script>
   <script src="<?= base_url() ?>assets/plugins/simplebar/js/simplebar.min.js"></script>
   <script src="<?= base_url() ?>assets/plugins/metismenu/js/metisMenu.min.js"></script>
   <script src="<?= base_url() ?>assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
@@ -805,6 +823,57 @@
   <script src="<?= base_url() ?>assets/js/app.js"></script>
   <script src="<?= base_url() ?>assets/js/step.js"></script>
   <script src="<?= base_url() ?>assets/toastr/toastr.min.js"></script>
+  <!-- Initialize Bootstrap Tooltips -->
+  <script>
+    (function() {
+      function initTooltips() {
+        if (typeof bootstrap === 'undefined' || !bootstrap.Tooltip) {
+          console.warn('Bootstrap Tooltip not available');
+          return;
+        }
+
+        var triggers = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+
+        // Dispose any existing instances
+        triggers.forEach(function(el) {
+          var existing = bootstrap.Tooltip.getInstance(el);
+          if (existing) existing.dispose();
+        });
+
+        // Create fresh tooltips
+        triggers.forEach(function(el) {
+          new bootstrap.Tooltip(el, {
+            trigger: 'hover focus',
+            placement: 'top',
+            fallbackPlacements: [],
+            container: 'body',
+            delay: { show: 100, hide: 50 }
+          });
+        });
+      }
+
+      // On full page load to ensure all elements exist
+      window.addEventListener('load', function() {
+        setTimeout(initTooltips, 150);
+      });
+
+      // Re-run after tab/step interactions
+      document.addEventListener('click', function(e) {
+        if (e.target.closest('[id^="step-"]') || e.target.closest('.tab-btn')) {
+          setTimeout(initTooltips, 100);
+        }
+      });
+
+      // Observe DOM changes inside the tabs container (for dynamic content)
+      var tabsContainer = document.getElementById('multiTabsBtnsContentSection');
+      if (tabsContainer && 'MutationObserver' in window) {
+        var observer = new MutationObserver(function() {
+          setTimeout(initTooltips, 50);
+        });
+        observer.observe(tabsContainer, { childList: true, subtree: true, attributes: true });
+      }
+    })();
+  </script>
   <!-- date selection  -->
   <script>
     $(document).ready(function() {
@@ -1043,7 +1112,8 @@
         url: ajaxUrl,
         type: "POST",
         data: {
-          workforceID: workforceID
+          workforceID: workforceID,
+          '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
         },
         success: function(response) {
           // alert(response);
@@ -1093,7 +1163,8 @@
         url: ajaxUrl,
         type: "POST",
         data: {
-          workforceID: workforceID
+          workforceID: workforceID,
+          '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
         },
         success: function(response) {
           // alert(response);
@@ -1156,7 +1227,8 @@
         type: "POST",
         data: {
           equipmentID: equipmentID,
-          qty: qty
+          qty: qty,
+          '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
         },
         success: function(response) {
           console.log(response);
@@ -1203,7 +1275,8 @@
         url: ajaxUrl,
         type: "POST",
         data: {
-          equipmentID: equipmentID
+          equipmentID: equipmentID,
+          '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
         },
         success: function(response) {
           if (response) {
@@ -1246,7 +1319,9 @@
       $.ajax({
         url: ajaxUrl,
         type: "POST",
-        data: {},
+        data: {
+          '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
+        },
         success: function(response) {
           if (response) {
             if (response == 'Invalid Request!') {
@@ -1322,7 +1397,8 @@
         data: {
           workforceID: workforceID,
           equipmentID: equipmentID,
-          assqty: assqty
+          assqty: assqty,
+          '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
         },
         success: function(response) {
           if (response) {
@@ -1377,7 +1453,8 @@
         url: ajaxUrl,
         type: "POST",
         data: {
-          assignID: assignID
+          assignID: assignID,
+          '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
         },
         success: function(response) {
           if (response) {

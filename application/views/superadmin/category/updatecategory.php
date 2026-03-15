@@ -74,6 +74,8 @@
                                 <hr />
                                 <?php foreach ($updateCategory as $catdata) { ?>
                                     <form action="<?= base_url('process-update-cat') ?>" method="post" enctype="multipart/form-data">
+                                        <!-- SECURITY FIX: Add CSRF token to form -->
+                                        <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                                         <input type="hidden" name="catID" value="<?= $catdata['web_catID'] ?>">
 
                                         <div class="row mb-3">

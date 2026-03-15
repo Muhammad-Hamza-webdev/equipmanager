@@ -1,0 +1,44 @@
+# ============================================================
+# EquipManager — Git Ignore
+# ============================================================
+
+# Environment / secrets — NEVER commit these
+phpenv.php
+.env
+.env.local
+application/config/stripe.php.local
+
+
+# PHP error logs
+php_errors.log
+application/logs/*.php
+!application/logs/index.html
+
+# CodeIgniter cache
+application/cache/*
+!application/cache/index.html
+
+# Node.js
+chat-server/node_modules/
+chat-server/.env
+chat-server/.env.local
+
+# Composer
+vendor/
+
+# Documentation
+Documentation/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Uploaded files (binary assets should not be in git)
+assets/uploads/*
+!assets/uploads/index.html

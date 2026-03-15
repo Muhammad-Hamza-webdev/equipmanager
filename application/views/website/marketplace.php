@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="<?= base_url() ?>assets/website/css/footer.css" />
     <link rel="stylesheet" href="<?= base_url() ?>assets/website/css/market.css" />
     <link rel="stylesheet" href="<?= base_url() ?>assets/website/css/resopnsive.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
     <!-- Link Swiper's CSS -->
     <link
       rel="stylesheet"
@@ -49,6 +50,8 @@
                 <div class="inner-search-2">
                   <span>Search Equipment</span>
                   <form action="" method="post" class="search-main">
+                    <!-- SECURITY FIX: Add CSRF token to form -->
+                    <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                     <!-- Custom Select Element -->
                     <div
                       class="custom-select-element custom-select-element-2"
@@ -2657,6 +2660,8 @@
             <span>Subscribe Our Newsletter</span>
             <div class="sub_email">
               <form action="" method="post">
+                <!-- SECURITY FIX: Add CSRF token to form -->
+                <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                 <input
                   type="email"
                   name="email"

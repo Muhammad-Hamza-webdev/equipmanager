@@ -54,6 +54,24 @@
                 </div>
             </div>
             <!--end breadcrumb-->
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title mb-4">System Administration</h6>
+                            <div class="row">
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <a href="<?= base_url('manage-system-settings') ?>" class="btn btn-primary w-100">
+                                        <i class="bi bi-sliders"></i> System Settings
+                                    </a>
+                                    <small class="text-muted d-block mt-2">Manage global commission rates and system configuration</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
         <!--end page main-->
 

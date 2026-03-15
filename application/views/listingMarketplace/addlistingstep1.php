@@ -38,6 +38,22 @@
 
   <title>Marketplace Listing</title>
   <style>
+    /* Force tooltips to stay centered on top */
+    .tooltip-inner {
+      transform: translateX(-50%) !important;
+      left: 50% !important;
+    }
+
+    /* Hide all tooltip arrows */
+    .tooltip-arrow {
+      display: none !important;
+    }
+
+    .bs-tooltip-top .tooltip-arrow,
+    .bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow {
+      display: none !important;
+    }
+
     .width-ctrl {
       --width: 25%;
     }
@@ -97,7 +113,7 @@
               <!-- Btn -->
               <div class="multi_tabs-btn 
                 active_tab
-                width-ctrl">
+                width-ctrl" data-bs-toggle="tooltip" data-bs-placement="top" title="Listing Type">
                 <div class="tab-progress-bar"></div>
                 <button class="tab-btn">
                   <span class="_circle">Step 1</span>
@@ -105,7 +121,7 @@
               </div>
               <!-- Btn -->
               <div class="multi_tabs-btn 
-                width-ctrl ">
+                width-ctrl " data-bs-toggle="tooltip" data-bs-placement="top" title="Listing Details">
                 <div class="tab-progress-bar "></div>
                 <button class="tab-btn" <?php if (!isset($_GET['edit'])) {
                                           echo 'disabled';
@@ -129,7 +145,7 @@
                 </button>
               </div>
               <!-- Btn -->
-              <div class="multi_tabs-btn" style="--width: 50%">
+              <div class="multi_tabs-btn" style="--width: 50%" data-bs-toggle="tooltip" data-bs-placement="top" title="Terms & Conditions">
                 <div class="tab-progress-bar"></div>
                 <button class="tab-btn" <?php if (!isset($_GET['edit'])) {
                                           echo 'disabled';
@@ -170,7 +186,7 @@
                       <input type="hidden" name="itemID" value="<?php echo isset($_GET['itemID']) ? $_GET['itemID'] : ''; ?>">
                       <div class="col-12">
                         <div class="d-flex align-items-center gap-20 mb-3">
-                          <label class="form-label mb-0" for="skill">Choose listing type</label>
+                          <label class="form-label mb-0" for="skill">Choose listing type <span data-bs-toggle="tooltip" title="Select 'Equipment' if you want to list tools, machines, or physical assets (Drills, generators, lifts, vehicles). Select 'Workforce' if you want to list employees or labor services (Electricians, operators, technicians).">ⓘ</span></label>
                         </div>
                         <select name="skill" required id="skill" onchange="return skillSelected()" class="form-control">
                           <option value="">Select Listing Type</option>
@@ -302,18 +318,28 @@
   <script src="<?= base_url() ?>assets/js/app.js"></script>
   <script src="<?= base_url() ?>assets/js/step.js"></script>
   <script src="<?= base_url() ?>assets/toastr/toastr.min.js"></script>
+  <!-- Initialize Bootstrap Tooltips -->
   <script>
-    function skillSelected() {
-      var skill = $('#skill').val();
-      if (skill == 1) {
-        $('#saleDiv').css('display', 'block');
-        $('#rentalTypeMain').fadeIn();
-      } else {
-        $('#saleDiv').css('display', 'none');
-        $('#rentalTypeMain').fadeIn();
+    $(document).ready(function() {
+      $('[data-bs-toggle="tooltip"]').tooltip({
+        placement: 'top',
+        fallbackPlacements: [],
+        container: 'body',
+        delay: { show: 100, hide: 50 }
+      });
+      
+      function skillSelected() {
+        var skill = $('#skill').val();
+        if (skill == 1) {
+          $('#saleDiv').css('display', 'block');
+          $('#rentalTypeMain').fadeIn();
+        } else {
+          $('#saleDiv').css('display', 'none');
+          $('#rentalTypeMain').fadeIn();
+        }
       }
-
-    }
+      window.skillSelected = skillSelected;
+    });
   </script>
   <?php
   if ($this->session->flashdata('listingAddedForApproval') != '') {

@@ -89,16 +89,25 @@
 
 
 
-          
+
           <li><a href="<?= base_url('features') ?>">FEATURES</a></li>
           <li><a href="#">BLOGS</a></li>
           <li><a href="<?= base_url('about-us') ?>">ABOUT US</a></li>
           <li><a href="<?= base_url('contact-us') ?>">CONTACT US</a></li>
         </ul>
-        <!-- button white -->
-        <a href="<?= base_url('login') ?> " class="btn-white">LOG IN</a>
-        <!-- button white -->
-        <a href="contact-us.html" class="btn-dark-green">BOOK A DEMO</a>
+        <!-- Show profile icon if user is logged in -->
+        <?php if ($this->session->userdata('loginData')): ?>
+          <!-- User logged in - show profile icon link to user-dashboard -->
+          <a href="<?= base_url('user-dashboard') ?>" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #34FF67; border-radius: 50%; margin-right: 15px; text-decoration: none; color: #000;" title="Go to Dashboard">
+            <i class="bi bi-person-fill" style="font-size: 18px;"></i>
+          </a>
+          <!-- BOOK A DEMO button shown for logged in users -->
+          <a href="<?= base_url('contact-us') ?>" class="btn-dark-green">BOOK A DEMO</a>
+        <?php else: ?>
+          <!-- User not logged in - show login and demo buttons -->
+          <a href="<?= base_url('login') ?>" class="btn-white">LOG IN</a>
+          <a href="<?= base_url('contact-us') ?>" class="btn-dark-green">BOOK A DEMO</a>
+        <?php endif; ?>
       </div>
 
       <label class="burger" for="burger">

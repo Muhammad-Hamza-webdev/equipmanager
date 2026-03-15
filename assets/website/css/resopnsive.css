@@ -648,6 +648,13 @@
   .booking-form {
     width: 100%;
   }
+  .purchase-form-expanded {
+    width: 100%;
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
 }
 /* ================================================================== */
 /* width 880px */

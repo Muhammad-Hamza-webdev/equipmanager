@@ -358,6 +358,14 @@
   width: 35%;
 }
 
+/* Expanded purchase form layout for wider desktop display */
+.purchase-form-expanded {
+  width: 100%;
+  flex: 0 0 100%;
+  max-width: none;
+  margin-left: -6%;
+}
+
 /* cleander main full with month and date */
 .arrow-section {
   display: flex;
@@ -405,10 +413,11 @@
 }
 .months-date {
   display: flex;
+  width: 100%;
 }
 .first-month {
   width: 50%;
-  padding: 30px 30px 0 30px;
+  padding: 20px 12px 0 12px;
   display: flex;
   flex-direction: column;
   gap: 30px;
@@ -423,8 +432,8 @@
   grid-template-columns: repeat(7, 1fr);
 }
 .days-date span {
-  padding: 9px 5px;
-  border-radius: 8px;
+  padding: 10px 6px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -449,10 +458,41 @@
 
 .second-month {
   width: 50%;
-  padding: 30px 30px 0 30px;
+  padding: 20px 12px 0 12px;
   display: flex;
   flex-direction: column;
   gap: 30px;
+}
+.booking-calender {
+  width: 100%;
+}
+.booking-calender-main {
+  width: 100%;
+}
+.text-day-num.selected-start,
+.text-day-num.selected-end,
+.text-day-num.in-range {
+  color: #0f2f2c;
+}
+.text-day-num.in-range {
+  background: #d2f3d7;
+  border-radius: 0 !important;
+}
+.text-day-num.selected-start {
+  background: var(--primary-parrot-green);
+  border-radius: 15px 2px 2px 15px !important;
+}
+.text-day-num.selected-end {
+  background: var(--primary-parrot-green);
+  border-radius: 2px 15px 15px 2px !important;
+}
+.text-day-num.selected-start.selected-end {
+  border-radius: 15px !important;
+}
+/* ensure legacy .active class follows the same shape */
+.text-day-num.active {
+  background: var(--primary-parrot-green);
+  border-radius: 15px 2px 2px 15px !important;
 }
 .active {
   background-color: var(--primary-parrot-green);

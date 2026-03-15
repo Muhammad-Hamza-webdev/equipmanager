@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="<?= base_url() ?>assets/website/css/footer.css" />
     <link rel="stylesheet" href="<?= base_url() ?>assets/website/css/contact.css" />
     <link rel="stylesheet" href="<?= base_url() ?>assets/website/css/resopnsive.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="<?= base_url() ?>assets/toastr/toastr.min.css" />
   </head>
   <body>
@@ -300,6 +301,8 @@
           <div class="cnt-form">
             <h3 class="text-h3 text-dark-green">Booking Form</h3>
             <form action="<?= base_url('contact-form-data') ?>" method="post" class="cnt-full-form">
+              <!-- SECURITY FIX: Add CSRF token to form -->
+              <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
               <div class="col-row">
                 <div class="form-group">
                   <label for="name">Name</label>

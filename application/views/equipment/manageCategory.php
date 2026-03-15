@@ -68,6 +68,7 @@
                 </div>
                 <hr />
                 <form action="<?=base_url('equipment-category-data')?>" method="post">
+                  <?= csrf_field() ?>
                   <div class="row mb-3">
                     <label
                       for="catName"
@@ -131,8 +132,8 @@
                     foreach($categories as $cat){
                 ?>
                 <tr>
-                  <td><?=$cat['catName']?></td>
-                  <td><?=$cat['catDesc']?></td>
+                  <td><?= h($cat['catName']) ?></td>
+                  <td><?= h($cat['catDesc']) ?></td>
                   <td>
                     <?php 
                     //count number of equipment in this category
@@ -190,6 +191,7 @@
                                           </div>
                                           <hr />
                                           <form action="<?=base_url('update-category-data/'.$cat['equipCatID'])?>" method="post">
+                                          <?= csrf_field() ?>
                                           <div class="row mb-3">
                                             <label
                                               for="catName"
@@ -201,7 +203,7 @@
                                                 id="catName"
                                                 name="catName"
                                                 required
-                                                value="<?=$cat['catName']?>"
+                                                value="<?= h($cat['catName']) ?>"
                                                 placeholder="Enter New Skill Name" />
                                             </div>
                                           </div>
@@ -216,7 +218,7 @@
                                                 name="catDesc"
                                                 rows="3"
                                                 required
-                                                placeholder="Address"><?php echo $cat['catDesc']?></textarea>
+                                                placeholder="Address"><?= h($cat['catDesc']) ?></textarea>
                                             </div>
                                           </div>
 

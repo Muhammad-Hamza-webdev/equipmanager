@@ -80,7 +80,7 @@
                         class="form-control"
                         <?php 
                           if(!empty($_GET['projectName'])){
-                            echo 'value="'.$_GET['projectName'].'"';
+                            echo 'value="'.htmlspecialchars($_GET['projectName'], ENT_QUOTES, 'UTF-8').'"';
                           }
                         ?>
                         id="projectName"

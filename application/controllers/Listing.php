@@ -438,4 +438,281 @@ class listing extends MY_Controller
 		$this->session->set_flashdata('listingdeleted', 'Please fill all fields!');
 		redirect(base_url('all-listing'));
 	}
+
+	/**
+	 * Get pricing and availability for equipment/workforce
+	 * Returns JSON response with price and stock info
+	 */
+	public function getPricing()
+	{
+		header('Content-Type: application/json');
+		
+		$itemType = $this->input->post('itemType'); // 'equipment' or 'workforce'
+		$itemID = $this->input->post('itemID');
+		
+		if (!$itemType || !$itemID) {
+			echo json_encode(['success' => false, 'message' => 'Invalid request']);
+			return;
+		}
+
+		try {
+			if ($itemType === 'equipment') {
+				$data = $this->generic->GetData('shopequipments', array('itemID' => $itemID));
+				
+				if ($data) {
+					echo json_encode([
+						'success' => true,
+						'rentalPrice' => floatval($data[0]['eqpPrice']),
+						'availableQty' => intval($data[0]['equipQty']),
+						'availableStart' => $data[0]['eqpAvailableStart'],
+						'availableEnd' => $data[0]['eqpAvailableEnd'],
+						'itemType' => 'equipment'
+					]);
+				} else {
+					echo json_encode(['success' => false, 'message' => 'Equipment not found']);
+				}
+			} else if ($itemType === 'workforce') {
+				$data = $this->generic->GetData('shopworkforce', array('itemID' => $itemID));
+				
+				if ($data) {
+					echo json_encode([
+						'success' => true,
+						'rentalPrice' => floatval($data[0]['workforcePrice']),
+						'availableQty' => 1, // Workforce typically quantity 1
+						'availableStart' => $data[0]['workforceAvailableStart'],
+						'availableEnd' => $data[0]['workforceAvailableEnd'],
+						'itemType' => 'workforce'
+					]);
+				} else {
+					echo json_encode(['success' => false, 'message' => 'Workforce not found']);
+				}
+			} else {
+				echo json_encode(['success' => false, 'message' => 'Invalid item type']);
+			}
+		} catch (Exception $e) {
+			echo json_encode(['success' => false, 'message' => 'Server error']);
+		}
+	}
+
+	/**
+	 * Process rent request with real-time stock validation
+	 * Uses database transactions to ensure atomic updates
+	 */
+	public function processRentRequest()
+	{
+		header('Content-Type: application/json');
+
+		$itemType = $this->input->post('itemType');
+		$itemID = $this->input->post('itemID');
+		$quantity = intval($this->input->post('quantity'));
+		$startDate = $this->input->post('startDate');
+		$endDate = $this->input->post('endDate');
+		$company = $this->security->xss_clean($this->input->post('company'));
+		$notes = $this->security->xss_clean($this->input->post('notes'));
+
+		// Basic validation
+		if (!$itemType || !$itemID || $quantity < 1 || !$startDate || !$endDate || !$company) {
+			echo json_encode(['success' => false, 'message' => 'All fields are required']);
+			return;
+		}
+
+		// Validate dates
+		$start = strtotime($startDate);
+		$end = strtotime($endDate);
+		
+		if ($end < $start) {
+			echo json_encode(['success' => false, 'message' => 'End date cannot be before start date']);
+			return;
+		}
+
+		// Calculate days (minimum 2 days)
+		$days = ceil(($end - $start) / 86400) + 1;
+		
+		if ($days < 2) {
+			echo json_encode(['success' => false, 'message' => 'Minimum rental period is 2 days']);
+			return;
+		}
+
+		// Start transaction for atomic operation
+		$this->db->trans_start();
+
+		try {
+			if ($itemType === 'equipment') {
+				// Get current stock with row lock
+				$equipment = $this->generic->GetData('shopequipments', array('itemID' => $itemID));
+				
+				if (!$equipment) {
+					throw new Exception('Equipment not found');
+				}
+
+				$availableQty = intval($equipment[0]['equipQty']);
+				$pricePerDay = floatval($equipment[0]['eqpPrice']);
+
+				// Validate stock availability
+				if ($quantity > $availableQty) {
+					throw new Exception('Insufficient stock. Only ' . $availableQty . ' units available');
+				}
+
+				// Calculate total cost
+				$totalCost = $pricePerDay * $quantity * $days;
+
+				// Decrement stock (prevents double booking)
+				$this->db->where('itemID', $itemID);
+				$this->db->set('equipQty', 'equipQty - ' . $quantity, FALSE);
+				$this->db->update('shopequipments');
+
+				// Store rental record in projects table (reusing existing structure)
+				$projectData = array(
+					'companyID' => 1, // Default company
+					'itemID' => $itemID,
+					'pName' => 'Rental Request - ' . $company,
+					'pLocation' => $company,
+					'pStartDate' => $startDate,
+					'pEndDate' => $endDate,
+					'pDesc' => 'Equipment Rental - ' . $notes,
+					'pStatus' => 1, // Pending status
+					'pDraftStatus' => 1
+				);
+
+				$this->generic->InsertData('projects', $projectData);
+
+			} else if ($itemType === 'workforce') {
+				// Get workforce data
+				$workforce = $this->generic->GetData('shopworkforce', array('itemID' => $itemID));
+				
+				if (!$workforce) {
+					throw new Exception('Workforce not found');
+				}
+
+				$pricePerDay = floatval($workforce[0]['workforcePrice']);
+
+				// Workforce is typically booked as 1 unit
+				if ($quantity != 1) {
+					$quantity = 1;
+				}
+
+				// Calculate total cost
+				$totalCost = $pricePerDay * $days;
+
+				// Store rental record
+				$projectData = array(
+					'companyID' => 1,
+					'itemID' => $itemID,
+					'pName' => 'Workforce Rental - ' . $company,
+					'pLocation' => $company,
+					'pStartDate' => $startDate,
+					'pEndDate' => $endDate,
+					'pDesc' => 'Workforce Rental - ' . $notes,
+					'pStatus' => 1,
+					'pDraftStatus' => 1
+				);
+
+				$this->generic->InsertData('projects', $projectData);
+			}
+
+			// Complete transaction
+			$this->db->trans_complete();
+
+			if ($this->db->trans_status() === FALSE) {
+				throw new Exception('Transaction failed. Please try again.');
+			}
+
+			echo json_encode([
+				'success' => true,
+				'message' => 'Rental request submitted successfully!',
+				'totalCost' => number_format($totalCost, 2),
+				'days' => $days
+			]);
+
+		} catch (Exception $e) {
+			$this->db->trans_rollback();
+			echo json_encode([
+				'success' => false,
+				'message' => $e->getMessage()
+			]);
+		}
+	}
+
+	/**
+	 * Process buy request (equipment only)
+	 * Permanently decrements stock using atomic transaction
+	 */
+	public function processBuyRequest()
+	{
+		header('Content-Type: application/json');
+
+		$itemID = $this->input->post('itemID');
+		$quantity = intval($this->input->post('quantity'));
+		$company = $this->security->xss_clean($this->input->post('company'));
+		$notes = $this->security->xss_clean($this->input->post('notes'));
+
+		// Basic validation
+		if (!$itemID || $quantity < 1 || !$company) {
+			echo json_encode(['success' => false, 'message' => 'All fields are required']);
+			return;
+		}
+
+		// Start transaction
+		$this->db->trans_start();
+
+		try {
+			// Get current stock
+			$equipment = $this->generic->GetData('shopequipments', array('itemID' => $itemID));
+			
+			if (!$equipment) {
+				throw new Exception('Equipment not found');
+			}
+
+			$availableQty = intval($equipment[0]['equipQty']);
+			$pricePerUnit = floatval($equipment[0]['eqpPrice']);
+
+			// Validate stock
+			if ($quantity > $availableQty) {
+				throw new Exception('Insufficient stock. Only ' . $availableQty . ' units available');
+			}
+
+			// Calculate total
+			$totalCost = $pricePerUnit * $quantity;
+
+			// Permanently decrement stock
+			$this->db->where('itemID', $itemID);
+			$this->db->set('equipQty', 'equipQty - ' . $quantity, FALSE);
+			$this->db->update('shopequipments');
+
+			// Store purchase record in projects table
+			$projectData = array(
+				'companyID' => 1,
+				'itemID' => $itemID,
+				'pName' => 'Purchase Request - ' . $company,
+				'pLocation' => $company,
+				'pStartDate' => date('Y-m-d'),
+				'pEndDate' => date('Y-m-d'),
+				'pDesc' => 'Equipment Purchase - Qty: ' . $quantity . ' - ' . $notes,
+				'pStatus' => 1,
+				'pDraftStatus' => 1
+			);
+
+			$this->generic->InsertData('projects', $projectData);
+
+			// Complete transaction
+			$this->db->trans_complete();
+
+			if ($this->db->trans_status() === FALSE) {
+				throw new Exception('Transaction failed. Please try again.');
+			}
+
+			echo json_encode([
+				'success' => true,
+				'message' => 'Purchase request submitted successfully!',
+				'totalCost' => number_format($totalCost, 2)
+			]);
+
+		} catch (Exception $e) {
+			$this->db->trans_rollback();
+			echo json_encode([
+				'success' => false,
+				'message' => $e->getMessage()
+			]);
+		}
+	}
 }

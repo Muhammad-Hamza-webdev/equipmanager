@@ -8,6 +8,7 @@ class superadmin extends MY_Controller
         parent::__construct();
         $this->load->helper('file');
         $this->load->model('Generic_model', 'generic');
+        $this->load->model('Payment_model', 'payment');
     }
 
     /**
@@ -47,6 +48,60 @@ class superadmin extends MY_Controller
         }
         redirect(base_url().$_GET['curentUrl']);
     }
+
+    // manage system settings
+    public function manageSystemSettings()
+    {
+        //check if user is admin
+        if ($this->session->userdata('loginData')['userType'] == 1) {
+            //get all system settings
+            $this->data['settings'] = $this->generic->GetData('system_settings');
+            $this->load->view('superadmin/system_settings/manage_settings', $this->data);
+        } else {
+            redirect(base_url());
+        }
+    }
+
+    // update system settings
+    public function updateSystemSettings()
+    {
+        //check if user is admin
+        if ($this->session->userdata('loginData')['userType'] == 1) {
+            $settingKey = $this->input->post('settingKey');
+            $settingValue = $this->input->post('settingValue');
+            $description = $this->input->post('description');
+
+            //get existing setting
+            $existingSetting = $this->generic->GetData('system_settings', array('settingKey' => $settingKey));
+
+            if ($existingSetting) {
+                //update existing setting
+                $updateData = array(
+                    'settingValue' => $settingValue,
+                    'description' => $description,
+                    'updatedBy' => $this->session->userdata('loginData')['userID']
+                );
+                $this->generic->Update('system_settings', array('settingKey' => $settingKey), $updateData);
+                $this->session->set_flashdata('successUpdated', 'System setting updated successfully!');
+            } else {
+                //insert new setting if it doesn't exist
+                $insertData = array(
+                    'settingKey' => $settingKey,
+                    'settingValue' => $settingValue,
+                    'settingType' => 'number',
+                    'description' => $description,
+                    'updatedBy' => $this->session->userdata('loginData')['userID']
+                );
+                $this->generic->InsertData('system_settings', $insertData);
+                $this->session->set_flashdata('successAdded', 'System setting added successfully!');
+            }
+
+            redirect(base_url('manage-system-settings'));
+        } else {
+            redirect(base_url());
+        }
+    }
+
 
     // manage super category page load
     public function ManageSuperCategory()
@@ -935,4 +990,250 @@ class superadmin extends MY_Controller
             redirect(base_url('all-listing'));
         }
     }
+
+    /**
+     * Payments Dashboard - View all payments and pending payouts
+     */
+    public function payments()
+    {
+        // Check if user is SuperAdmin
+        if ($this->session->userdata('loginData')['userType'] != 1) {
+            redirect(base_url());
+            return;
+        }
+
+        // Get pending payouts
+        $this->data['pending_payouts'] = $this->payment->getPendingPayouts();
+
+        // Get payment statistics
+        $this->data['stats'] = $this->payment->getPaymentStats();
+
+        $this->load->view('superadmin/payments/dashboard', $this->data);
+    }
+
+    /**
+     * Approve payout
+     */
+    public function approvePayout()
+    {
+        // Check if user is SuperAdmin
+        if ($this->session->userdata('loginData')['userType'] != 1) {
+            echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+            return;
+        }
+
+        $payout_id = $this->input->post('payout_id');
+        $notes = $this->input->post('notes');
+
+        if (!$payout_id) {
+            echo json_encode(['success' => false, 'error' => 'Payout ID required']);
+            return;
+        }
+
+        $admin_id = $this->session->userdata('loginData')['userID'];
+        $this->payment->updatePayoutStatus($payout_id, 'approved', $admin_id, $notes);
+
+        $this->session->set_flashdata('success', 'Payout approved successfully!');
+        echo json_encode(['success' => true]);
+    }
+
+    /**
+     * Reject payout
+     */
+    public function rejectPayout()
+    {
+        // Check if user is SuperAdmin
+        if ($this->session->userdata('loginData')['userType'] != 1) {
+            echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+            return;
+        }
+
+        $payout_id = $this->input->post('payout_id');
+        $notes = $this->input->post('notes');
+
+        if (!$payout_id) {
+            echo json_encode(['success' => false, 'error' => 'Payout ID required']);
+            return;
+        }
+
+        $admin_id = $this->session->userdata('loginData')['userID'];
+        $this->payment->updatePayoutStatus($payout_id, 'rejected', $admin_id, $notes);
+
+        $this->session->set_flashdata('error', 'Payout rejected');
+        echo json_encode(['success' => true]);
+    }
+
+    /**
+     * Set commission percentage for an item
+     */
+    public function setItemCommission()
+    {
+        // Check if user is SuperAdmin
+        if ($this->session->userdata('loginData')['userType'] != 1) {
+            echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+            return;
+        }
+
+        $item_id = $this->input->post('item_id');
+        $commission_percent = floatval($this->input->post('commission_percent'));
+
+        if (!$item_id || $commission_percent < 0 || $commission_percent > 100) {
+            echo json_encode(['success' => false, 'error' => 'Invalid input']);
+            return;
+        }
+
+        $admin_id = $this->session->userdata('loginData')['userID'];
+        $this->payment->setItemCommission($item_id, $commission_percent, $admin_id);
+
+        $this->session->set_flashdata('success', 'Commission set successfully!');
+        echo json_encode(['success' => true]);
+    }
+
+    /**
+     * Display all orders from all companies (Super Admin view)
+     */
+    public function all_orders()
+    {
+        // Check if user is SuperAdmin
+        if ($this->session->userdata('loginData')['userType'] != 1) {
+            redirect(base_url());
+            return;
+        }
+
+        $this->load->database();
+
+        // Get filter parameter from URL
+        $filter = $this->input->get('status');
+
+        // Build query to get all orders
+        $this->db->select([
+            'ep.equipmentPaymentID',
+            'ep.buyerUserID',
+            'ep.sellerCompanyID',
+            'ep.grossAmount',
+            'ep.commissionAmount as commission',
+            'ep.orderStatus as status',
+            'ep.createdAt',
+            'u.userName as buyerFirstName',
+            'u.userEmail as buyerEmail',
+            'cd.companyName'
+        ])
+        ->from('equipment_payments ep')
+        ->join('users u', 'ep.buyerUserID = u.userID', 'left')
+        ->join('companydetail cd', 'ep.sellerCompanyID = cd.companyID', 'left');
+
+        // Apply filter if provided
+        if ($filter && !empty($filter)) {
+            $valid_filters = ['requested', 'payment_pending', 'payment_secured', 'shipped', 'completed', 'rejected'];
+            if (in_array($filter, $valid_filters)) {
+                $this->db->where('ep.orderStatus', $filter);
+            }
+        }
+
+        // Order by newest first
+        $this->db->order_by('ep.createdAt', 'DESC');
+
+        $query = $this->db->get();
+        $orders = $query->result();
+
+        // Prepare data for view
+        $data = [
+            'orders' => $orders,
+            'filter' => $filter
+        ];
+
+        // Load the view with layout
+        $this->load->view('superadmin/all_orders', $data);
+    }
+
+    /**
+     * Display detailed order information (Super Admin view)
+     */
+    public function view_order($order_id)
+    {
+        // Check if user is SuperAdmin
+        if ($this->session->userdata('loginData')['userType'] != 1) {
+            redirect(base_url());
+            return;
+        }
+
+        // Validate order ID is numeric
+        if (!is_numeric($order_id)) {
+            show_404();
+            return;
+        }
+
+        $this->load->database();
+
+        // Get complete order details
+        $order = $this->db->select([
+            'ep.*',
+            'e.equipName as equipmentName',
+            'e.equipDesc',
+            'e.equipImg as equipImage',
+            'e.equipTotalQuantity',
+            'u.userName as buyerName',
+            'u.userEmail as buyerEmail',
+            'u.userPhone as buyerPhone',
+            'cd.companyName as sellerCompanyName',
+            'seller.userName as sellerUserName',
+            'oc.chatID',
+            'approver.userName as approvedByName'
+        ])
+        ->from('equipment_payments ep')
+        ->join('equipment e', 'ep.equipmentID = e.equipmentID', 'left')
+        ->join('users u', 'ep.buyerUserID = u.userID', 'left')
+        ->join('companydetail cd', 'ep.sellerCompanyID = cd.companyID', 'left')
+        ->join('users seller', 'cd.userID = seller.userID', 'left')
+        ->join('order_chats oc', 'ep.equipmentPaymentID = oc.equipmentPaymentID', 'left')
+        ->join('users approver', 'ep.approvedBy = approver.userID', 'left')
+        ->where('ep.equipmentPaymentID', $order_id)
+        ->get()
+        ->row();
+
+        if (!$order) {
+            show_404();
+            return;
+        }
+
+        // Build images array — try shopequipments first, fallback to equipment main image
+        $images = [];
+        if (!empty($order->itemID)) {
+            $shop_eq = $this->db->select([
+                'eqpimg1','eqpimg2','eqpimg3','eqpimg4','eqpimg5',
+                'eqpimg6','eqpimg7','eqpimg8','eqpimg9','eqpimg10'
+            ])->from('shopequipments')->where('itemID', $order->itemID)->limit(1)->get()->row();
+            if ($shop_eq) {
+                for ($i = 1; $i <= 10; $i++) {
+                    $f = 'eqpimg' . $i;
+                    if (!empty($shop_eq->$f)) $images[] = 'assets/website/images/' . $shop_eq->$f;
+                }
+            }
+        }
+        if (empty($images) && !empty($order->equipmentID)) {
+            $shop_eq = $this->db->select([
+                'eqpimg1','eqpimg2','eqpimg3','eqpimg4','eqpimg5',
+                'eqpimg6','eqpimg7','eqpimg8','eqpimg9','eqpimg10'
+            ])->from('shopequipments')->where('equipmentID', $order->equipmentID)->limit(1)->get()->row();
+            if ($shop_eq) {
+                for ($i = 1; $i <= 10; $i++) {
+                    $f = 'eqpimg' . $i;
+                    if (!empty($shop_eq->$f)) $images[] = 'assets/website/images/' . $shop_eq->$f;
+                }
+            }
+        }
+        if (empty($images) && !empty($order->equipImage)) {
+            $images[] = 'assets/website/images/' . $order->equipImage;
+        }
+
+        // Prepare data for view
+        $data = [
+            'order'  => $order,
+            'images' => $images
+        ];
+
+        // Load the view with layout
+        $this->load->view('superadmin/order_detail', $data);
+    }
 }
+

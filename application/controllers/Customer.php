@@ -11,6 +11,7 @@ class customer extends MY_Controller
 		parent::__construct();
 		$this->load->helper('file');
 		$this->load->model('Generic_model', 'generic');
+		$this->load->model('Payment_model', 'payment');
 		$this->data['cartCount'] = $this->generic->GetCount('cart', 'cartID', array('customerID' => $this->session->userdata['loginData']['userID'], 'cartStatus' => 0));
 	}
 
@@ -79,16 +80,17 @@ class customer extends MY_Controller
 			$totalAmount = 0;
 			$li = '';
 			foreach ($cartProduct as $row) {
-				$li = $li . '  <li class="list-group-item" id="cartItems_' . $row['cartID'] . '" style="justify-content: start !important;display:flex;
+				// M9: Escape all user-supplied values to prevent stored XSS
+				$li = $li . '  <li class="list-group-item" id="cartItems_' . (int)$row['cartID'] . '" style="justify-content: start !important;display:flex;
   gap: 20px;">
 				<div>
-                                                    <a href="javascript:void(0);" onclick="deleteCart(' . $row['cartID'] . ')"><i class="far fa-window-close" style="color: red;"></i></a>
+                                                    <a href="javascript:void(0);" onclick="deleteCart(' . (int)$row['cartID'] . ')"><i class="far fa-window-close" style="color: red;"></i></a>
                                                 </div>
                                                     <div>
-                                                        <h6 class="my-0">' . $row['productName'] . '</h6>
-                                                        <small class="text-muted" >' . $row['productDesp'] . '</small>
+                                                        <h6 class="my-0">' . h($row['productName']) . '</h6>
+                                                        <small class="text-muted" >' . h($row['productDesp']) . '</small>
                                                     </div>
-                                                    <span class="text-muted" style="margin-left: auto;">$' . $row['price'] . ' X ' . $row['quantity'] . '</span>
+                                                    <span class="text-muted" style="margin-left: auto;">$' . h($row['price']) . ' X ' . h($row['quantity']) . '</span>
                                                 </li>';
 				$totalAmount = $totalAmount + ($row['price'] * $row['quantity']);
 			}
@@ -285,5 +287,30 @@ Thank you!
 		$this->data['userData'] = $this->generic->GetData('users', array('userID' => $this->data['order'][0]['customerID']));
 		$this->data['cartProduct'] = $this->generic->GetProductsByCart(array('c.cartStatus' => 1, 'checkoutID' => $this->uri->segment(2)));
 		$this->load->view('customer/invoice', $this->data);
+	}
+
+	/**
+	 * Earnings Dashboard for Company Admin
+	 */
+	public function earnings()
+	{
+		// Check if user is Company Admin
+		if ($this->session->userdata('loginData')['userType'] != 2) {
+			redirect(base_url());
+			return;
+		}
+
+		$company_id = $this->session->userdata('companyDetails')['companyID'];
+
+		// Get payments for this company
+		$this->data['payments'] = $this->payment->getPaymentsBySeller($company_id);
+
+		// Get payouts for this company
+		$this->data['payouts'] = $this->payment->getPayoutsByCompany($company_id);
+
+		// Get statistics
+		$this->data['stats'] = $this->payment->getPaymentStats(['company_id' => $company_id]);
+
+		$this->load->view('customer/earnings', $this->data);
 	}
 }

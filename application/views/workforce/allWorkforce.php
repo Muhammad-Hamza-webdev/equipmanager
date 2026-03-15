@@ -77,7 +77,7 @@
                     <select name="personSkill" id="personSkill" class="form-control">
                       <option value="">Select Skill</option>
                       <?php
-                      if ($skills) {
+                      if ($skills && is_array($skills)) {
                         foreach ($skills as $skill) {
                       ?>
                           <option
@@ -101,7 +101,7 @@
                       name="personName"
                       id="personName"
                       value="<?php if (isset($_GET['personName'])) {
-                                echo $_GET['personName'];
+                                echo htmlspecialchars($_GET['personName'], ENT_QUOTES, 'UTF-8');
                               } ?>"
                       class="form-control"
                       placeholder="Enter Person Name" />
@@ -233,12 +233,12 @@
                                 height="44"
                                 alt="" />
                               <div class="">
-                                <p class="mb-0"><?= $workforce['personName'] ?></p>
+                                <p class="mb-0"><?= h($workforce['personName']) ?></p>
                               </div>
                             </div>
                           </td>
-                          <td><?= $workforce['personEmail'] ?></td>
-                          <td><?= $workforce['personPhone'] ?></td>
+                          <td><?= h($workforce['personEmail']) ?></td>
+                          <td><?= h($workforce['personPhone']) ?></td>
                           <?php
                           $skillsArr = array_map('trim', explode(',', $workforce['skillNames']));
                           $maxToShow = 2;
@@ -335,13 +335,14 @@
                                               <h6 class="mb-0 text-uppercase">Edit workforce</h6>
                                               <hr />
                                               <form class="row g-3" method="post" action="<?= base_url('edit-work-force/' . $workforce['workforceID']) ?>" enctype="multipart/form-data">
+                                                <?= csrf_field() ?>
                                                 <div class="col-12">
                                                   <label class="form-label">Person Name</label>
                                                   <input
                                                     type="text"
                                                     class="form-control"
                                                     name="personName"
-                                                    value="<?= $workforce['personName'] ?>"
+                                                    value="<?= h($workforce['personName']) ?>"
                                                     id="personName"
                                                     placeholder="Enter Person Name" />
                                                 </div>
@@ -351,7 +352,7 @@
                                                   <select class="multiple-select" id="personSkill" name="personSkill[]" data-placeholder="Choose anything" multiple="multiple">
                                                     <option value="">Select Skill</option>
                                                     <?php
-                                                    if ($skills) {
+                                                    if ($skills && is_array($skills)) {
                                                       $selectedSkills = array_map('trim', explode(',', $workforce['skillNames']));
 
                                                       foreach ($skills as $skill) {
@@ -377,7 +378,7 @@
                                                     type="number"
                                                     class="form-control"
                                                     name="personPhone"
-                                                    value="<?= $workforce['personPhone'] ?>"
+                                                    value="<?= h($workforce['personPhone']) ?>"
                                                     id="personPhone"
                                                     placeholder="Enter Phone Number" />
                                                 </div>
@@ -386,7 +387,7 @@
                                                   <input
                                                     type="email"
                                                     class="form-control"
-                                                    value="<?= $workforce['personEmail'] ?>"
+                                                    value="<?= h($workforce['personEmail']) ?>"
                                                     name="personEmail"
                                                     id="personEmail"
                                                     placeholder="Enter Email Address" />
@@ -399,7 +400,7 @@
 
                                                     name="personAddress"
                                                     rows="4"
-                                                    cols="4"><?= $workforce['personAddInfo'] ?></textarea>
+                                                    cols="4"><?= h($workforce['personAddInfo']) ?></textarea>
                                                 </div>
                                                 <div class="col-12">
                                                   <div class="d-grid">
@@ -498,6 +499,7 @@
                     <h6 class="mb-0 text-uppercase">Add workforce</h6>
                     <hr />
                     <form class="row g-3" method="post" action="<?= base_url('add-work-force-data?worforcelist=1') ?>" enctype="multipart/form-data">
+                      <?= csrf_field() ?>
                       <div class="col-12">
                         <label class="form-label">Person Name</label>
                         <input
@@ -513,7 +515,7 @@
                         <select class="multiple-select" id="personSkill" name="personSkill[]" data-placeholder="Choose anything" multiple="multiple">
                           <option value="">Select Skill</option>
                           <?php
-                          if ($skills) {
+                          if ($skills && is_array($skills)) {
                             foreach ($skills as $skill) {
                           ?>
                               <option value="<?= $skill['skillID'] ?>"><?= $skill['skillName'] ?></option>
@@ -621,6 +623,7 @@
                     </div>
                     <hr />
                     <form method="post" action="<?= base_url('add-skill-data/?allWorkforce=1') ?>">
+                      <?= csrf_field() ?>
                       <div class="row mb-3">
                         <label
                           for="skillName"

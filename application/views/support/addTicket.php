@@ -63,6 +63,8 @@
                 <h6 class="mb-0 text-uppercase">Add Ticket</h6>
                 <hr />
                 <form class="row g-3" method="post" action="<?= base_url('add-ticket-data') ?>" enctype="multipart/form-data">
+                  <!-- SECURITY FIX: Add CSRF token to form -->
+                  <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                  
                   <div class="col-12">
                     <div class="d-flex align-items-center gap-20 mb-3">

@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="<?= base_url() ?>assets/website/css/footer.css" />
   <link rel="stylesheet" href="<?= base_url() ?>assets/website/css/market.css" />
   <link rel="stylesheet" href="<?= base_url() ?>assets/website/css/resopnsive.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
   <!-- Link Swiper's CSS -->
   <link
     rel="stylesheet"
@@ -48,6 +49,8 @@
               <div class="inner-search-2">
                 <span>Search Equipment</span>
                 <form action="" method="post" class="search-main">
+                  <!-- SECURITY FIX: Add CSRF token to form -->
+                  <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                   <!-- Custom Select Element -->
                   <div
                     class="custom-select-element custom-select-element-2"
@@ -490,12 +493,14 @@
                   <div class="wish">
                     <span><?= $row['web_catName'] ?></span>
                     <span>
-                      <?php 
-                        if($row['saleType']==1){
-                          echo 'Rental';
-                        }else{
-                          echo 'For Sale';
-                        }
+                      <?php
+                      if ($row['equipQty'] <= 0) {
+                        echo '<span style="color: red; font-weight: bold;">Out of Stock</span>';
+                      } elseif ($row['saleType'] == 1) {
+                        echo 'Rental';
+                      } else {
+                        echo 'For Sale';
+                      }
 
                       ?>
                     </span>
@@ -519,17 +524,17 @@
                     <span class="prod-name"><?= $row['equipName'] ?></span>
                     <div class="prod-price">
                       <span>Price</span>
-                      <span>$<?= $row['eqpPrice'] ?> 
-                        <?php 
-                        if($row['saleType']==1){
+                      <span>$<?= $row['eqpPrice'] ?>
+                        <?php
+                        if ($row['saleType'] == 1) {
                           echo ' /';
-                          if($row['eqpRentalType']==1){
+                          if ($row['eqpRentalType'] == 1) {
                             echo 'Per Day';
-                          }else if($row['eqpRentalType']==2){
+                          } else if ($row['eqpRentalType'] == 2) {
                             echo 'Per Week';
-                          }else if($row['eqpRentalType']==3){
+                          } else if ($row['eqpRentalType'] == 3) {
                             echo 'Per Month';
-                          }else{
+                          } else {
                             echo 'Per Year';
                           }
                         }
@@ -553,24 +558,28 @@
                         width: 100%;
                       "></div>
                     </foreignObject>
-                    <a href="<?= base_url('equipment-detail?item='.rtrim(strtr(base64_encode($row['itemID'] . '|mySecret'), '+/', '-_'), '=')) ?>">
-                    <circle
-                      data-figma-bg-blur-radius="22"
-                      cx="20"
-                      cy="20"
-                      r="20"
-                      fill="#34FF67" />
-                    <path
-                      d="M25.0361 16.1111C25.0354 15.8073 24.9144 15.5162 24.6997 15.3015C24.4849 15.0867 24.1938 14.9658 23.8901 14.9651L17.4083 14.9651C17.2578 14.9651 17.1088 14.9947 16.9697 15.0523C16.8307 15.1099 16.7044 15.1943 16.598 15.3007C16.383 15.5156 16.2623 15.8071 16.2623 16.1111C16.2623 16.415 16.383 16.7065 16.598 16.9214C16.8129 17.1363 17.1044 17.257 17.4083 17.257H21.1237L15.3017 23.079C15.0868 23.2939 14.9661 23.5853 14.9661 23.8892C14.9661 24.1931 15.0868 24.4846 15.3017 24.6995C15.5166 24.9143 15.808 25.0351 16.1119 25.0351C16.4158 25.0351 16.7073 24.9143 16.9222 24.6995L22.7441 18.8775L22.7441 22.5929C22.7441 22.7434 22.7738 22.8924 22.8314 23.0314C22.8889 23.1705 22.9734 23.2968 23.0798 23.4032C23.1862 23.5096 23.3125 23.594 23.4516 23.6516C23.5906 23.7092 23.7396 23.7389 23.8901 23.7389C24.0406 23.7389 24.1896 23.7092 24.3287 23.6516C24.4677 23.594 24.594 23.5096 24.7004 23.4032C24.8068 23.2968 24.8913 23.1705 24.9489 23.0314C25.0064 22.8924 25.0361 22.7434 25.0361 22.5929L25.0361 16.1111Z"
-                      fill="#0F2F2C" />
-                    <defs>
-                      <clipPath
-                        id="bgblur_0_2718_1750_clip_path"
-                        transform="translate(22 22)">
-                        <circle cx="20" cy="20" r="20" />
-                      </clipPath>
-                    </defs>
-                    </a>
+                    <?php if ($row['equipQty'] > 0): ?>
+                      <a href="<?= base_url('equipment-detail?item=' . rtrim(strtr(base64_encode($row['itemID'] . '|mySecret'), '+/', '-_'), '=')) ?>">
+                      <?php else: ?>
+                        <a href="javascript:void(0)" style="cursor: not-allowed; opacity: 0.5;">
+                        <?php endif; ?>
+                        <circle
+                          data-figma-bg-blur-radius="22"
+                          cx="20"
+                          cy="20"
+                          r="20"
+                          fill="#34FF67" />
+                        <path
+                          d="M25.0361 16.1111C25.0354 15.8073 24.9144 15.5162 24.6997 15.3015C24.4849 15.0867 24.1938 14.9658 23.8901 14.9651L17.4083 14.9651C17.2578 14.9651 17.1088 14.9947 16.9697 15.0523C16.8307 15.1099 16.7044 15.1943 16.598 15.3007C16.383 15.5156 16.2623 15.8071 16.2623 16.1111C16.2623 16.415 16.383 16.7065 16.598 16.9214C16.8129 17.1363 17.1044 17.257 17.4083 17.257H21.1237L15.3017 23.079C15.0868 23.2939 14.9661 23.5853 14.9661 23.8892C14.9661 24.1931 15.0868 24.4846 15.3017 24.6995C15.5166 24.9143 15.808 25.0351 16.1119 25.0351C16.4158 25.0351 16.7073 24.9143 16.9222 24.6995L22.7441 18.8775L22.7441 22.5929C22.7441 22.7434 22.7738 22.8924 22.8314 23.0314C22.8889 23.1705 22.9734 23.2968 23.0798 23.4032C23.1862 23.5096 23.3125 23.594 23.4516 23.6516C23.5906 23.7092 23.7396 23.7389 23.8901 23.7389C24.0406 23.7389 24.1896 23.7092 24.3287 23.6516C24.4677 23.594 24.594 23.5096 24.7004 23.4032C24.8068 23.2968 24.8913 23.1705 24.9489 23.0314C25.0064 22.8924 25.0361 22.7434 25.0361 22.5929L25.0361 16.1111Z"
+                          fill="#0F2F2C" />
+                        <defs>
+                          <clipPath
+                            id="bgblur_0_2718_1750_clip_path"
+                            transform="translate(22 22)">
+                            <circle cx="20" cy="20" r="20" />
+                          </clipPath>
+                        </defs>
+                        </a>
                   </svg>
                 </div>
               </div>
@@ -1642,6 +1651,8 @@
           <span>Subscribe Our Newsletter</span>
           <div class="sub_email">
             <form action="" method="post">
+              <!-- SECURITY FIX: Add CSRF token to form -->
+              <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
               <input
                 type="email"
                 name="email"

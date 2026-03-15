@@ -37,6 +37,22 @@
 
   <title>Marketplace Listing</title>
   <style>
+    /* Force tooltips to stay centered on top */
+    .tooltip-inner {
+      transform: translateX(-50%) !important;
+      left: 50% !important;
+    }
+
+    /* Hide all tooltip arrows */
+    .tooltip-arrow {
+      display: none !important;
+    }
+
+    .bs-tooltip-top .tooltip-arrow,
+    .bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow {
+      display: none !important;
+    }
+
     /* Custom styles for the dropdown */
     .cities-dropdown {
       position: absolute;
@@ -249,14 +265,14 @@
               <!-- Btn -->
               <div class="multi_tabs-btn 
                 
-                width-ctrl">
+                width-ctrl" data-bs-toggle="tooltip" data-bs-placement="top" title="Listing Type">
                 <div class="tab-progress-bar"></div>
                 <a href="
                 <?php
                 if (!isset($_GET['edit'])) {
                   echo base_url('add-listing');
                 } else {
-                  echo base_url('add-listing/?itemID=' . $_GET['itemID'] . '&edit=1');
+                  echo base_url('add-listing/?itemID=' . urlencode($_GET['itemID']) . '&edit=1');
                 }
                 ?>
                 " class="tab-btn">
@@ -266,14 +282,14 @@
               <!-- Btn -->
               <div class="multi_tabs-btn 
                 active_tab
-                width-ctrl">
+                width-ctrl" data-bs-toggle="tooltip" data-bs-placement="top" title="Listing Details">
                 <div class="tab-progress-bar"></div>
                 <button class="tab-btn">
                   <span class="_circle">Step 2</span>
                 </button>
               </div>
               <!-- Btn -->
-              <div class="multi_tabs-btn" style="--width: 50%">
+              <div class="multi_tabs-btn" style="--width: 50%" data-bs-toggle="tooltip" data-bs-placement="top" title="Terms & Conditions">
                 <div class="tab-progress-bar"></div>
                 <button class="tab-btn" <?php if (!isset($_GET['edit'])) {
                                           echo 'disabled';
@@ -281,7 +297,7 @@
                   <?php
                   if (isset($_GET['edit'])) {
                   ?>
-                    <a href="<?= base_url('add-listing?listingID='.$_GET['itemID'].'&edit=1') ?>">
+                    <a href="<?= base_url('add-listing?listingID='.urlencode($_GET['itemID']).'&edit=1') ?>">
                     <?php
                   }
                     ?>
@@ -317,11 +333,12 @@
                         Add details ( Equipment )
                       </h6>
                       <hr />
-                      <form class="row g-3" method="post" enctype="multipart/form-data" action="<?= base_url('add-equipment-listing-data/?skill=' . $_GET['skill'] . '&rentalType=' . $_GET['rentalType']) ?>">
+                      <form class="row g-3" method="post" enctype="multipart/form-data" action="<?= base_url('add-equipment-listing-data/?skill=' . urlencode($_GET['skill']) . '&rentalType=' . urlencode($_GET['rentalType'])) ?>">
+                        <?= csrf_field() ?>
                         <?php
                         if (isset($_GET['itemID']) && $_GET['itemID'] != '') {
                         ?>
-                          <input type="hidden" name="itemID" value="<?php echo isset($_GET['itemID']) ? $_GET['itemID'] : ''; ?>">
+                          <input type="hidden" name="itemID" value="<?php echo htmlspecialchars($_GET['itemID'], ENT_QUOTES, 'UTF-8'); ?>">
                         <?php
                         } else {
                         ?> <input type="hidden" name="itemID" value="">
@@ -330,7 +347,7 @@
                         }
                         ?>
                         <div class="col-6">
-                          <label class="form-label">Equipment</label>
+                          <label class="form-label">Equipment <span data-bs-toggle="tooltip" title="Select the equipment you want to list on the marketplace.">ⓘ</span></label>
                           <select name="eqpID" id="eqpID"
                             <?php
                             if (isset($_GET['itemID']) && $_GET['itemID'] != '') {
@@ -366,7 +383,7 @@
 
                         </div>
                         <div class="col-6">
-                          <label for="qty" class="form-label">Quantity</label>
+                          <label for="qty" class="form-label">Quantity <span data-bs-toggle="tooltip" title="Enter only the number of available units. Don't enter text. Examples: 1, 3, 10">ⓘ</span></label>
                           <input type="number"
                             <?php
                             if (isset($_GET['itemID']) && $_GET['itemID'] != '') {
@@ -396,7 +413,7 @@
                         }
                         ?>
                         <div class="col-6">
-                          <label class="form-label">Availability (Start - End)</label>
+                          <label class="form-label">Availability (Start - End) <span data-bs-toggle="tooltip" title="Select the date range when this equipment is available for rental or sale. You can update availability later if needed.">ⓘ</span></label>
                           <input
                             type="text"
                             class="form-control"
@@ -435,7 +452,7 @@
 
                         </div>
                         <div class="col-6">
-                          <label class="form-label">Marketplace Category</label>
+                          <label class="form-label">Marketplace Category <span data-bs-toggle="tooltip" title="Choose the category that best describes the equipment. This helps renters find your listing more easily.">ⓘ</span></label>
                           <select name="eqpCat" id="eqpCat" required class="form-control">
                             <option value="">Select Category</option>
                             <?php
@@ -464,7 +481,7 @@
                         </div>
 
                         <div class="col-12">
-                          <label class="form-label">Brand/Model</label>
+                          <label class="form-label">Brand/Model <span data-bs-toggle="tooltip" title="Enter the brand or model name of the equipment. This helps renters understand exactly what is being offered. Examples: Milwaukee, Bosch, Makita">ⓘ</span></label>
                           <input
                             type="text"
                             class="form-control"
@@ -484,7 +501,7 @@
                         <div class="col-12">
 
                           <div class="star-rating">
-                            <label class="form-label">Condition &nbsp;&nbsp;</label>
+                            <label class="form-label">Condition <span data-bs-toggle="tooltip" title="Rate the condition of the equipment based on its overall state and functionality. Be honest - accurate condition ratings build trust and reduce disputes.">ⓘ</span>&nbsp;&nbsp;</label>
                             <input type="radio" id="star1" name="eqpCond" value="1" required <?php if (isset($_GET['itemID']) && $_GET['itemID'] != '' && $shopItem[0]['eqpCondition'] == 1) echo 'checked'; ?>>
                             <label for="star1" data-bs-toggle="tooltip" title="Major defects affecting performance, nearing end-of-life, requires significant attention or
 replacement."><i class="bi bi-star star-icon"></i></label>
@@ -495,7 +512,7 @@ replacement."><i class="bi bi-star star-icon"></i></label>
                             <input type="radio" id="star4" name="eqpCond" value="4" <?php if (isset($_GET['itemID']) && $_GET['itemID'] != '' && $shopItem[0]['eqpCondition'] == 4) echo 'checked'; ?>>
                             <label for="star4" data-bs-toggle="tooltip" title="Like new, no defects, optimal performance."><i class="bi bi-star star-icon"></i></label>
                           </div>
-                          <label class="form-label">Specs</label>
+                          <label class="form-label">Specs <span data-bs-toggle="tooltip" title="Add technical specifications or key details. Each spec should describe one important feature. Press enter after typing each key detail. Examples: Voltage: 18V, Power: 2.5 kW, Weight: 4.2 kg">ⓘ</span></label>
                           <div class="tag-input-container" id="tagInputContainer">
                             <input
                               type="text"
@@ -517,7 +534,7 @@ replacement."><i class="bi bi-star star-icon"></i></label>
                                                       ?><?= $shopItem[0]['eqpSpecs'] ?> <?php } ?></textarea>
                         </div>
                         <div class="col-6">
-                          <label class="form-label">Location(City)</label>
+                          <label class="form-label">Location(City) <span data-bs-toggle="tooltip" title="Enter the city where the equipment is located. This helps renters understand logistics and distance.">ⓘ</span></label>
                           <div class="position-relative">
                             <input
                               type="text"
@@ -537,7 +554,7 @@ replacement."><i class="bi bi-star star-icon"></i></label>
                           </div>
                         </div>
                         <div class="col-6">
-                          <label class="form-label">Complete Address</label>
+                          <label class="form-label">Complete Address <span data-bs-toggle="tooltip" title="Enter the full address where the equipment can be picked up or delivered from. This information is only shared after a contract has been fully created and accepted by both you and the renter. This helps protect your privacy and ensures a secure transaction.">ⓘ</span></label>
                           <div class="position-relative">
                             <input
                               type="text"
@@ -558,7 +575,7 @@ replacement."><i class="bi bi-star star-icon"></i></label>
                         if ($_GET['rentalType'] == 0) {
                         ?>
                           <div class="col-6">
-                            <label class="form-label">Rental Price Type</label>
+                            <label class="form-label">Rental Price Type <span data-bs-toggle="tooltip" title="Choose how the rental price is calculated. Options: Per day, Per week, Per month">ⓘ</span></label>
                             <select name="priceType" required id="priceType" class="form-control">
                               <option
                                 value="">Select Options</option>
@@ -604,7 +621,7 @@ replacement."><i class="bi bi-star star-icon"></i></label>
                         }
                         ?>
                         <div class="col-6">
-                          <label class="form-label">Pricing</label>
+                          <label class="form-label">Pricing <span data-bs-toggle="tooltip" title="Enter the price based on the selected rental price type.">ⓘ</span></label>
                           <input
                             type="number"
                             name="price"
@@ -623,7 +640,7 @@ replacement."><i class="bi bi-star star-icon"></i></label>
 
 
                         <div class="col-12">
-                          <label class="form-label">Upload Image (Max 10)</label>
+                          <label class="form-label">Upload Image (Max 10) <span data-bs-toggle="tooltip" title="Upload images or files related to the equipment. This can include photos, manuals, technical drawings, or documentation. Clear images increase trust and improve listing performance.">ⓘ</span></label>
                           <input type="file" multiple name="eqpImgs[]" id="eqpImgs" class="form-control" />
                           <!-- load images for equipments -->
                           <?php
@@ -682,16 +699,17 @@ replacement."><i class="bi bi-star star-icon"></i></label>
                         Add details ( Workforce )
                       </h6>
                       <hr />
-                      <form class="row g-3" method="post" enctype="multipart/form-data" action="<?= base_url('add-workforce-listing-data/?skill=' . $_GET['skill'] . '&rentalType=' . $_GET['rentalType'])  ?>">
+                      <form class="row g-3" method="post" enctype="multipart/form-data" action="<?= base_url('add-workforce-listing-data/?skill=' . urlencode($_GET['skill']) . '&rentalType=' . urlencode($_GET['rentalType']))  ?>">
+                        <?= csrf_field() ?>
                         <?php
                         if (isset($_GET['itemID'])) {
                         ?>
-                          <input type="hidden" name="itemID" value="<?php echo isset($_GET['itemID']) ? $_GET['itemID'] : ''; ?>">
+                          <input type="hidden" name="itemID" value="<?php echo htmlspecialchars($_GET['itemID'], ENT_QUOTES, 'UTF-8'); ?>">
                         <?php
                         }
                         ?>
                         <div class="col-6">
-                          <label class="form-label">Select Workforce</label>
+                          <label class="form-label">Select Workforce <span data-bs-toggle="tooltip" title="Select the workforce member you want to list on the marketplace.">ⓘ</span></label>
                           <select
                             <?php
                             if (isset($_GET['itemID']) && $_GET['itemID'] != '') {
@@ -736,7 +754,7 @@ replacement."><i class="bi bi-star star-icon"></i></label>
                         }
                         ?>
                         <div class="col-6">
-                          <label class="form-label">Availability (Start - End)</label>
+                          <label class="form-label">Availability (Start - End) <span data-bs-toggle="tooltip" title="Select the date range when this workforce member is available for rental or hire. You can update availability later if needed.">ⓘ</span></label>
                           <input
                             type="text"
                             class="form-control"
@@ -758,7 +776,7 @@ replacement."><i class="bi bi-star star-icon"></i></label>
                           ?>
                         </div>
                         <div class="col-12">
-                          <label class="form-label">Marketplace Category</label>
+                          <label class="form-label">Marketplace Category <span data-bs-toggle="tooltip" title="Choose the category that best describes the workforce skills. This helps clients find your listing more easily.">ⓘ</span></label>
                           <select name="eqpCat" id="eqpCat" required class="form-control">
                             <option value="">Select Category</option>
                             <?php
@@ -788,7 +806,7 @@ replacement."><i class="bi bi-star star-icon"></i></label>
                         </div>
 
                         <div class="col-12">
-                          <label class="form-label">Upload CV </label>
+                          <label class="form-label">Upload CV <span data-bs-toggle="tooltip" title="Upload your CV or resume. This document helps clients understand your qualifications and experience.">ⓘ</span></label>
                           <input
                             type="file"
                             class="form-control"
@@ -821,7 +839,7 @@ replacement."><i class="bi bi-star star-icon"></i></label>
                         }
                         ?>
                         <div class="col-12">
-                          <label class="form-label">Certificate</label>
+                          <label class="form-label">Certificate <span data-bs-toggle="tooltip" title="Upload any relevant certificates or credentials. This helps establish credibility and expertise.">ⓘ</span></label>
                           <input
                             type="file"
                             id="certificate"
@@ -884,7 +902,7 @@ replacement."><i class="bi bi-star star-icon"></i></label>
                           </div>
                         </div>
                         <div class="col-6">
-                          <label class="form-label">Rental Price Type</label>
+                          <label class="form-label">Rental Price Type <span data-bs-toggle="tooltip" title="Choose how the rental price is calculated. Options: Per day, Per week, Per month, Per year">ⓘ</span></label>
                           <select name="priceType" required id="priceType" class="form-control">
                             <option value="">Select Options</option>
                             <option
@@ -926,7 +944,7 @@ replacement."><i class="bi bi-star star-icon"></i></label>
                           </select>
                         </div>
                         <div class="col-6">
-                          <label class="form-label">Pricing Amount</label>
+                          <label class="form-label">Pricing Amount <span data-bs-toggle="tooltip" title="Enter the price based on the selected rental price type.">ⓘ</span></label>
                           <input
                             type="number"
                             class="form-control"
@@ -1055,7 +1073,8 @@ replacement."><i class="bi bi-star star-icon"></i></label>
           url: '<?= base_url('listing/fetchWorkforceAvailablity') ?>',
           type: 'POST',
           data: {
-            workforceID: workforceID
+            workforceID: workforceID,
+            '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
           },
           dataType: 'json',
           success: function(response) {
@@ -1218,7 +1237,8 @@ replacement."><i class="bi bi-star star-icon"></i></label>
           url: '<?= base_url('listing/fetchEquipmentAvailablity') ?>',
           type: 'POST',
           data: {
-            eqpID: eqpID
+            eqpID: eqpID,
+            '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
           },
           dataType: 'json',
           success: function(response) {
@@ -1263,7 +1283,12 @@ replacement."><i class="bi bi-star star-icon"></i></label>
   </script>
   <script>
     $(document).ready(function() {
-      $('[data-bs-toggle="tooltip"]').tooltip();
+      $('[data-bs-toggle="tooltip"]').tooltip({
+        placement: 'top',
+        fallbackPlacements: [],
+        container: 'body',
+        delay: { show: 100, hide: 50 }
+      });
       $('.star-rating label').hover(function() {
         $(this).prevAll('label').addBack().addClass('hovered');
       }, function() {

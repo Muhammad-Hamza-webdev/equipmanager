@@ -68,6 +68,8 @@
                 </div>
                 <hr />
                 <form action="<?=base_url('project-cat-data')?>" method="post">
+                  <!-- SECURITY FIX: Add CSRF token to form -->
+                  <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                   <div class="row mb-3">
                     <label
                       for="pCatName"
@@ -179,6 +181,8 @@
                                           </div>
                                           <hr />
                                           <form action="<?=base_url('update-project-category-data/'.$cat['pCatID'])?>" method="post">
+                                          <!-- SECURITY FIX: Add CSRF token to form -->
+                                          <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                                           <div class="row mb-3">
                                             <label
                                               for="pCatName"

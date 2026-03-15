@@ -73,7 +73,7 @@
                       id="equipName"
                       name="equipName"
                       <?php if (isset($_GET['equipName']) && $_GET['equipName'] != '') { ?>
-                      value="<?= $_GET['equipName'] ?>"
+                      value="<?= h($this->input->get('equipName', TRUE)) ?>"
                       <?php } ?>
                       class="form-control"
                       placeholder="Enter Keyword" />
@@ -89,10 +89,10 @@
                       if (!empty($equipCat)) {
                         foreach ($equipCat as $cat) { ?>
                           <option
-                            <?php if (isset($_GET['equipCatID']) && $_GET['equipCatID'] == $cat['equipCatID']) {
+                            <?php if ($this->input->get('equipCatID') !== NULL && $this->input->get('equipCatID') == $cat['equipCatID']) {
                               echo 'selected';
                             } ?>
-                            value="<?= $cat['equipCatID'] ?>"><?= $cat['catName'] ?></option>
+                            value="<?= (int)$cat['equipCatID'] ?>"><?= h($cat['catName']) ?></option>
                         <?php  }
                       } else { ?>
                         <option value="">No Category Found</option>
@@ -238,6 +238,7 @@
                                               <h6 class="mb-0 text-uppercase">Edit Equipment</h6>
                                               <hr />
                                               <form class="row g-3" method="post" action="<?= base_url('edit-equipment-data/'.$equip['equipmentID'].'?equipmentList=1') ?>" enctype="multipart/form-data">
+                                                <?= csrf_field() ?>
                                                 <div class="col-12">
                                                   <label class="form-label">Equipment Name</label>
                                                   <input
@@ -390,6 +391,7 @@
                     <h6 class="mb-0 text-uppercase">Add Equipment</h6>
                     <hr />
                     <form class="row g-3" method="post" action="<?= base_url('add-equipment-data?equipmentList=1') ?>" enctype="multipart/form-data">
+                      <?= csrf_field() ?>
                       <div class="col-12">
                         <label class="form-label">Equipment Name</label>
                         <input
@@ -504,6 +506,7 @@
                     </div>
                     <hr />
                     <form action="<?= base_url('equipment-category-data?equipmnetlist=1') ?>" method="post">
+                      <?= csrf_field() ?>
                       <div class="row mb-3">
                         <label
                           for="catName"

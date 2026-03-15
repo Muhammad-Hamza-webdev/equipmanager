@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="<?= base_url() ?>assets/website/css/footer.css" />
   <link rel="stylesheet" href="<?= base_url() ?>assets/website/css/home.css" />
   <link rel="stylesheet" href="<?= base_url() ?>assets/website/css/resopnsive.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
   <meta name="description" content="<?=$pageData[0]['metaDesc'] ?> ">
   <meta name="keywords" content="<?=$pageData[0]['metaKeywords'] ?>">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -56,6 +57,8 @@
       <div class="inner-search">
         <span>Search Equipment</span>
         <form action="" method="post" class="search-main">
+          <!-- SECURITY FIX: Add CSRF token to form -->
+          <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
           <!-- Custom Select Element -->
           <div
             class="custom-select-element"

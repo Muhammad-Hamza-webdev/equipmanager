@@ -11,6 +11,58 @@
   <link rel="stylesheet" href="<?= base_url() ?>assets/website/css/footer.css" />
   <link rel="stylesheet" href="<?= base_url() ?>assets/website/css/marketplace-product-detail.css" />
   <link rel="stylesheet" href="<?= base_url() ?>assets/website/css/resopnsive.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+  <style>
+    /* Calendar alignment and range styling (mirrors equipment detail) */
+    .text-day-num.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      color: #999 !important;
+      pointer-events: none;
+    }
+
+    .text-day-num.selected-start,
+    .text-day-num.selected-end,
+    .text-day-num.in-range {
+      color: #0f2f2c !important;
+      font-weight: bold;
+    }
+
+    .text-day-num.in-range {
+      background: rgba(52, 255, 103, 0.2) !important;
+      border-radius: 0 !important;
+    }
+
+    .text-day-num.selected-start {
+      background: var(--primary-parrot-green) !important;
+      border-radius: 15px 2px 2px 15px !important;
+    }
+
+    .text-day-num.selected-end {
+      background: var(--primary-parrot-green) !important;
+      border-radius: 2px 15px 15px 2px !important;
+    }
+
+    .text-day-num.selected-start.selected-end {
+      border-radius: 15px !important;
+    }
+
+    .text-day-num:not(.disabled):not(.empty):hover {
+      background-color: rgba(52, 255, 103, 0.3) !important;
+      cursor: pointer;
+    }
+
+    /* Center single calendar */
+    .months-date {
+      display: flex;
+      justify-content: center;
+    }
+
+    .first-month {
+      width: 100%;
+      max-width: 400px;
+    }
+  </style>
 </head>
 
 <body class="off_white">
@@ -73,17 +125,17 @@
           <!-- product sub imgs -->
           <div class="product-showcase-sub-img">
             <!-- <?php
-            for ($i = 1; $i <= 10; $i++) {
-              $imgColumn = 'eqpimg' . $i;
-              if (isset($equipment[0][$imgColumn]) && !empty($equipment[0][$imgColumn])) {
-            ?>
+                  for ($i = 1; $i <= 10; $i++) {
+                    $imgColumn = 'eqpimg' . $i;
+                    if (isset($equipment[0][$imgColumn]) && !empty($equipment[0][$imgColumn])) {
+                  ?>
                 <img
                   src="<?= base_url() ?>assets/website/images/<?= $equipment[0][$imgColumn] ?>"
                   alt="Product Image"
                   data-index="1" />
             <?php
-              }
-            }
+                    }
+                  }
             ?> -->
           </div>
         </div>
@@ -96,24 +148,24 @@
             </h2>
             <p class="text-para text-dark-green">
               Price:
-              <span>$<?= $workforce[0]['workforcePrice'] ?> 
-                        <?php 
-                        if($workforce[0]['saleType']==0){
-                          echo ' /';
-                          if($workforce[0]['workforceRentalType']==1){
-                            echo 'Per Day';
-                          }else if($workforce[0]['workforceRentalType']==2){
-                            echo 'Per Week';
-                          }else if($workforce[0]['workforceRentalType']==3){
-                            echo 'Per Month';
-                          }else{
-                            echo 'Per Year';
-                          }
-                        }else{
-                          echo '(For Sale)';
-                        }
-                        ?>
-                      </span>
+              <span>$<?= $workforce[0]['workforcePrice'] ?>
+                <?php
+                if ($workforce[0]['saleType'] == 0) {
+                  echo ' /';
+                  if ($workforce[0]['workforceRentalType'] == 1) {
+                    echo 'Per Day';
+                  } else if ($workforce[0]['workforceRentalType'] == 2) {
+                    echo 'Per Week';
+                  } else if ($workforce[0]['workforceRentalType'] == 3) {
+                    echo 'Per Month';
+                  } else {
+                    echo 'Per Year';
+                  }
+                } else {
+                  echo '(For Sale)';
+                }
+                ?>
+              </span>
             </p>
             <!-- owner info -->
             <div class="owner-info-main">
@@ -210,7 +262,7 @@
                   </defs>
                 </svg>
               </div>
-              <span class="text-para"><a  href="<?= base_url('assets/website/documents/' . $workforce[0]['workforceCV'])  ?>" target="_blank"><strong>Download CV</strong> </a></span>
+              <span class="text-para"><a href="<?= base_url('assets/website/documents/' . $workforce[0]['workforceCV'])  ?>" target="_blank"><strong>Download CV</strong> </a></span>
             </div>
             <!-- single feature -->
             <div class="single-feature">
@@ -235,7 +287,7 @@
                     fill="white" />
                 </svg>
               </div>
-              <span class="text-para"><a  href="<?= base_url('assets/website/documents/' . $workforce[0]['workforceCertif'])  ?>" target="_blank"><strong>Download Certificate</strong> </a></span>
+              <span class="text-para"><a href="<?= base_url('assets/website/documents/' . $workforce[0]['workforceCertif'])  ?>" target="_blank"><strong>Download Certificate</strong> </a></span>
             </div>
             <!-- single feature -->
             <!-- <div class="single-feature">
@@ -277,11 +329,11 @@
                   </defs>
                 </svg>
               </div>
-              <?php 
-              if($workforce[0]['WorkforceAdd'] !=''){
+              <?php
+              if ($workforce[0]['WorkforceAdd'] != '') {
               ?>
-              <span class="text-para"><strong>Address : </strong> <?= $workforce[0]['WorkforceAdd'] ?> </span><br><br>
-              <?php 
+                <span class="text-para"><strong>Address : </strong> <?= $workforce[0]['WorkforceAdd'] ?> </span><br><br>
+              <?php
               }
               ?>
               <span class="text-para"><strong>City : </strong><?= $workforce[0]['workforceCity'] ?></span>
@@ -400,7 +452,7 @@
                     <!-- dates -->
                     <div class="days-date"></div>
                   </div>
-                  <div class="second-month hide-sm">
+                  <div class="second-month" style="display: none;">
                     <!-- main calender -->
                     <div class="days-name">
                       <span class="text-day">MON</span>
@@ -422,33 +474,71 @@
           </div>
           <div class="booking-form">
             <div class="cnt-form product-form">
-              <h3 class="text-h3 text-dark-green">Booking Form</h3>
-              <form action="" method="post" class="cnt-full-form">
+              <h3 class="text-h3 text-dark-green">Rent Now</h3>
+              <?php if ($this->session->userdata('loginData')): ?>
+              <form action="" method="post" class="cnt-full-form" id="rent-form" data-base-price="<?= $workforce[0]['workforcePrice'] ?>">
+                <!-- SECURITY FIX: Add CSRF token to form -->
+                <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
+                <!-- Workforce Quantity is always 1 (Hidden) -->
+                <input type="hidden" id="quantity" name="quantity" value="1" />
+
+                <!-- Dates are selected via the calendar -->
                 <div class="form-group">
-                  <label for="company_text">Company</label>
+                  <label for="startDate">Start Date <span style="color: #ff3434;">*</span></label>
                   <input
                     type="text"
-                    id="company_text"
-                    placeholder="Enter company name..." />
+                    id="startDate"
+                    name="startDate"
+                    placeholder="Select from calendar..."
+                    readonly
+                    required />
                 </div>
+
                 <div class="form-group">
-                  <label for="company_date">Rental Dates</label>
-                  <input
-                    type="date"
-                    id="company_date"
-                    placeholder="Enter company name..." />
-                </div>
-                <div class="form-group">
-                  <label for="company_note">Note</label>
+                  <label for="endDate">End Date <span style="color: #ff3434;">*</span></label>
                   <input
                     type="text"
-                    id="company_note"
-                    placeholder="Requirements..." />
+                    id="endDate"
+                    name="endDate"
+                    placeholder="Select from calendar..."
+                    readonly
+                    required />
                 </div>
+
+                <input type="hidden" id="itemType" value="2" /> <!-- 2 = Workforce -->
+                <input type="hidden" id="itemId" value="<?php echo $workforce[0]['itemID']; ?>" />
+
+                <!-- Loading Indicator -->
+                <div id="total-loading" style="display:none; background: #f0f9f4; padding: 16px; border-radius: 8px; margin-bottom: 16px; text-align: center;">
+                  <div style="font-size: 14px; color: #526464; margin-bottom: 8px;">Calculating price...</div>
+                  <div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #e0e0e0; border-top: 3px solid #34FF67; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                </div>
+                <style>
+                  @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                  }
+                </style>
+
+                <!-- Total Cost Display -->
+                <div id="total-cost-display" class="total-cost-display" style="background: #f0f9f4; padding: 16px; border-radius: 8px; margin-bottom: 16px; text-align: center; display: none;">
+                  <div class="label" style="font-size: 14px; color: #526464; margin-bottom: 4px;">Total Rental Cost</div>
+                  <div id="total-amount" class="amount" style="font-size: 28px; font-weight: bold; color: #0f2f2c;">$0.00</div>
+                  <div id="cost-breakdown" class="details" style="font-size: 12px; color: #666; margin-top: 8px;"></div>
+                </div>
+
+                <div id="calc-error" style="display:none; color: red; margin-bottom: 15px; text-align: center;"></div>
+
                 <div class="form-submit">
-                  <a href="#" class="btn-dark-green w-full">Request to Rent</a>
+                  <button type="button" onclick="proceedToCheckoutWorkforce()" class="btn-dark-green w-full">Proceed to Checkout</button>
                 </div>
               </form>
+              <?php else: ?>
+              <div style="background: #f0f9f4; padding: 24px; border-radius: 8px; text-align: center;">
+                <p style="font-size: 16px; color: #0f2f2c; margin-bottom: 16px;">Please log in to hire this workforce</p>
+                <a href="<?= base_url('login') ?>" class="btn-dark-green" style="display: inline-block; padding: 12px 24px; text-decoration: none; border-radius: 8px;">Log in to Hire</a>
+              </div>
+              <?php endif; ?>
             </div>
           </div>
         </div>
@@ -456,6 +546,9 @@
     </div>
   </section>
 
+  <!-- TOASTR CONFIGURATION -->
+  <link rel="stylesheet" href="<?= base_url() ?>assets/toastr/toastr.min.css" />
+  
   <!-- footer section -->
   <footer class="footer">
     <div class="container">
@@ -512,6 +605,8 @@
           <span>Subscribe Our Newsletter</span>
           <div class="sub_email">
             <form action="" method="post">
+              <!-- SECURITY FIX: Add CSRF token to form -->
+              <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
               <input
                 type="email"
                 name="email"
@@ -697,6 +792,123 @@
     </div>
   </section>
 </body>
+<script>
+  window.APP_BASE_URL = '<?= site_url('/') ?>';
+</script>
+<script src="<?= base_url() ?>assets/toastr/toastr.min.js"></script>
+<script>
+  // Configure toastr options
+  toastr.options = {
+    "closeButton": true,
+    "progressBar": true,
+    "positionClass": "toast-top-right",
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "5000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+  };
+
+  // Pass availability dates to JavaScript for calendar filtering
+  window.workforceAvailability = {
+    startDate: '<?= $workforce[0]['workforceAvailableStart'] ?? '' ?>',
+    endDate: '<?= $workforce[0]['workforceAvailableEnd'] ?? '' ?>',
+    itemType: 2 // 2 = Workforce
+  };
+
+  console.log('✅ Workforce availability loaded:', window.workforceAvailability);
+</script>
 <script src="<?= base_url() ?>assets/website/js/product-detail.js"></script>
+<!-- SECURITY FIX: Store CSRF token for AJAX requests in rental-purchase-handler.js and price-calculator.js -->
+<script>
+  window.CSRF_TOKEN_NAME = '<?= $this->security->get_csrf_token_name() ?>';
+  window.CSRF_TOKEN_VALUE = '<?= $this->security->get_csrf_hash() ?>';
+</script>
+<script src="<?= base_url() ?>assets/website/js/rental-purchase-handler.js"></script>
+<script src="<?= base_url() ?>assets/website/js/price-calculator.js"></script>
+<script>
+  /**
+   * Checkout Redirect for Workforce Rental
+   * Validates form data and redirects to secure checkout page
+   * Workforce quantity is always 1
+   */
+  function proceedToCheckoutWorkforce() {
+    console.log('🛒 Proceeding to checkout - Mode: Workforce Rental');
+    
+    const form = document.getElementById('rent-form');
+    const itemId = document.getElementById('itemId').value;
+    const quantity = 1; // Workforce is always 1 person
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const itemType = 2; // Workforce
+    
+    // ===== VALIDATION =====
+    if (!itemId || itemId === '') {
+      toastr.error('Item ID missing. Please refresh the page.');
+      return;
+    }
+    
+    // Workforce dates are required
+    if (!startDate || startDate === '') {
+      toastr.error('⚠️ Please select a start date from the calendar');
+      return;
+    }
+    if (!endDate || endDate === '') {
+      toastr.error('⚠️ Please select an end date from the calendar');
+      return;
+    }
+    
+    // Validate date format (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(startDate) || !dateRegex.test(endDate)) {
+      toastr.error('❌ Invalid date format. Please use the calendar to select dates.');
+      return;
+    }
+    
+    // Validate dates are not swapped
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (start >= end) {
+      toastr.error('❌ End date must be after start date');
+      return;
+    }
+    
+    // ===== BUILD CHECKOUT URL =====
+    let checkoutUrl = '<?= site_url('checkout') ?>' + '?item_id=' + itemId + '&quantity=' + quantity + '&start_date=' + startDate + '&end_date=' + endDate;
+    
+    console.log('✅ Checkout URL:', checkoutUrl);
+    console.log('📦 Params:', { itemId, quantity, startDate, endDate, itemType });
+    console.log('🎯 Redirecting to checkout page...');
+    
+    // Redirect to checkout page
+    window.location.href = checkoutUrl;
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const calculator = new PriceCalculator({
+      itemId: document.getElementById('itemId').value,
+      itemType: 2, // Workforce
+      saleType: 0, // Workforce is always rental
+      baseUrl: '<?= site_url('/') ?>',
+      basePrice: <?= $workforce[0]['workforcePrice'] ?>,
+      baseUnit: '<?= $workforce[0]['workforceRentalType'] == 1 ? 'Per Day' : ($workforce[0]['workforceRentalType'] == 2 ? 'Per Week' : ($workforce[0]['workforceRentalType'] == 3 ? 'Per Month' : 'Per Year')) ?>',
+      elementIds: {
+        quantity: 'quantity', // Workforce always has quantity 1 (hidden)
+        startDate: 'startDate',
+        endDate: 'endDate',
+        totalDisplay: 'total-cost-display',
+        totalAmount: 'total-amount',
+        breakdown: 'cost-breakdown',
+        submitButton: 'submit-rental',
+        errorDisplay: 'calc-error'
+      }
+    });
+    
+    console.log('✅ Price calculator initialized for workforce rental');
+  });
+</script>
 
 </html>

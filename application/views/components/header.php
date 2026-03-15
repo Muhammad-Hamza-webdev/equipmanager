@@ -165,6 +165,8 @@
                             echo "Company Owner";
                           } else if ($this->session->userdata('loginData')['userType'] == 3) {
                             echo "Manager";
+                          } else if ($this->session->userdata('loginData')['userType'] == 4) {
+                            echo "User";
                           } else {
                             echo "Admin";
                           }

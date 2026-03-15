@@ -15,6 +15,8 @@
         <div class="containers">
             <div class="inner-login">
                 <form method="post" class="form" action="<?= base_url('login-data') ?>">
+                    <!-- SECURITY FIX: Add CSRF token to form -->
+                    <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                     <div class="main-box">
                         <div class="img">
                             <svg width="72" height="72" viewBox="0 0 72 72" fill="none"

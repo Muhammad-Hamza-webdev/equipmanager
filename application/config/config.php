@@ -6,24 +6,29 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Base Site URL
 |--------------------------------------------------------------------------
 |
-| URL to your CodeIgniter root. Typically this will be your base URL,
-| WITH a trailing slash:
-|
-|	http://example.com/
-|
-| WARNING: You MUST set this value!
-|
-| If it is not set, then CodeIgniter will try to guess the protocol and
-| path to your installation, but due to security concerns the hostname will
-| be set to $_SERVER['SERVER_ADDR'] if available, or localhost otherwise.
-| The auto-detection mechanism exists only for convenience during
-| development and MUST NOT be used in production!
-|
-| If you need to allow multiple domains, remember that this file is still
-| a PHP script and you can easily do that on your own.
+| Auto-detected for localhost, ngrok, and production.
+| Works with HTTPS behind reverse proxies.
 |
 */
-$config['base_url'] = 'http://localhost/equipmanager/';
+// Detect protocol (handles reverse proxies like ngrok)
+$protocol = 'http';
+if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+    $protocol = 'https';
+} elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+    $protocol = 'https';
+}
+
+// Detect host (ngrok passes X-Forwarded-Host)
+$host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
+if (!empty($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+    $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
+}
+
+// Detect path
+$path = preg_replace('@/index\\.php/*@', '', $_SERVER['SCRIPT_NAME']);
+$path = rtrim($path, '/') . '/';
+
+$config['base_url'] = $protocol . '://' . $host . $path;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,7 +40,7 @@ $config['base_url'] = 'http://localhost/equipmanager/';
 | variable so that it is blank.
 |
 */
-$config['index_page'] = 'index.php';
+$config['index_page'] = '';
 
 /*
 |--------------------------------------------------------------------------
@@ -225,7 +230,9 @@ $config['allow_get_array'] = TRUE;
 | your log files will fill up very fast.
 |
 */
-$config['log_threshold'] = 0;
+// 0=off, 1=errors only, 2=debug, 3=info, 4=all
+// Set to 1 minimum so security events (failed auth, payment errors) are recorded.
+$config['log_threshold'] = 1;
 
 /*
 |--------------------------------------------------------------------------
@@ -326,7 +333,7 @@ $config['cache_query_string'] = FALSE;
 | https://codeigniter.com/userguide3/libraries/encryption.html
 |
 */
-$config['encryption_key'] = '';
+$config['encryption_key'] = '7892bbfc03a05af9d835d2e79c87138c07322445f71a7e2fb80ed7b05c703014';
 
 /*
 |--------------------------------------------------------------------------
@@ -384,13 +391,13 @@ $config['encryption_key'] = '';
 |
 */
 $config['sess_driver'] = 'files';
-$config['sess_cookie_name'] = 'ci_session';
+$config['sess_cookie_name'] = 'equipmgr_session';
 $config['sess_samesite'] = 'Lax';
 $config['sess_expiration'] = 7200;
 $config['sess_save_path'] = NULL;
-$config['sess_match_ip'] = FALSE;
+$config['sess_match_ip'] = FALSE;  // Keep FALSE to avoid issues with users behind load balancers
 $config['sess_time_to_update'] = 300;
-$config['sess_regenerate_destroy'] = FALSE;
+$config['sess_regenerate_destroy'] = TRUE;  // Destroy old session data on regeneration
 
 /*
 |--------------------------------------------------------------------------
@@ -411,9 +418,12 @@ $config['sess_regenerate_destroy'] = FALSE;
 $config['cookie_prefix']	= '';
 $config['cookie_domain']	= '';
 $config['cookie_path']		= '/';
-$config['cookie_secure']	= FALSE;
-$config['cookie_httponly'] 	= FALSE;
-$config['cookie_samesite'] 	= 'Lax';
+// Detect HTTPS including behind reverse proxies
+$is_https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+            (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+$config['cookie_secure'] = $is_https;
+$config['cookie_httponly'] 	= TRUE;
+$config['cookie_samesite'] 	= 'Lax';  // Lax permits same-site nav; use Strict in prod
 
 /*
 |--------------------------------------------------------------------------
@@ -457,12 +467,22 @@ $config['global_xss_filtering'] = FALSE;
 | 'csrf_regenerate' = Regenerate token on every submission
 | 'csrf_exclude_uris' = Array of URIs which ignore CSRF checks
 */
-$config['csrf_protection'] = FALSE;
-$config['csrf_token_name'] = 'csrf_test_name';
-$config['csrf_cookie_name'] = 'csrf_cookie_name';
+$config['csrf_protection'] = TRUE;
+$config['csrf_token_name'] = 'csrf_token';
+$config['csrf_cookie_name'] = 'csrf_cookie';
 $config['csrf_expire'] = 7200;
-$config['csrf_regenerate'] = TRUE;
-$config['csrf_exclude_uris'] = array();
+$config['csrf_regenerate'] = FALSE;  // FALSE prevents token churn on AJAX
+// Exclude: Stripe webhook (no session), and all session-authenticated AJAX endpoints
+$config['csrf_exclude_uris'] = array(
+    'stripe/webhook',
+    'api/pricecalculator/calculate',
+    'orders/confirm_delivery',
+    'checkout/prepare_payment',
+    'checkout/create_purchase_request',
+    'checkout/process_workforce_checkout',
+    'chat/api_send',      // Node.js chat server → PHP (server-to-server, no browser session)
+    'chat/api_validate',  // Node.js chat server → PHP (server-to-server, no browser session)
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -529,4 +549,6 @@ $config['rewrite_short_tags'] = FALSE;
 | Comma-separated:	'10.0.1.200,192.168.5.0/24'
 | Array:		array('10.0.1.200', '192.168.5.0/24')
 */
-$config['proxy_ips'] = '';
+// Allow all IPs to proxy (safe for localhost + ngrok development)
+// In production, restrict to specific trusted proxy IPs
+$config['proxy_ips'] = '*';

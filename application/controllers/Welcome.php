@@ -98,14 +98,14 @@ class Welcome extends MY_Controller
 		$this->load->view('website/equipmentMarketplace', $this->data);
 	}
 	public function equipmentDetailMarketPlace(){
-		$itemid=$_GET['item'];
+		$itemid=$this->input->get('item', TRUE);
 		$decoded=base64_decode(strtr($itemid, '-_', '+/'));
 		$itemid=explode('|', $decoded)[0];
 		$this->data['equipment'] = $this->generic->GetMarketPlaceEquipmentData(array('si.itemStatus' => 1, 'si.liveStatus' => 1,'si.itemID'=>$itemid));
 		$this->load->view('website/equipmentDetail',$this->data);
 	}
 	public function WorkforceDetailMarketPlace(){
-		$itemid=$_GET['item'];
+		$itemid=$this->input->get('item', TRUE);
 		$decoded=base64_decode(strtr($itemid, '-_', '+/'));
 		$itemid=explode('|', $decoded)[0];
 		$this->data['workforce'] = $this->generic->GetMarketPlaceWorkforceData(array('si.itemStatus' => 1, 'si.liveStatus' => 1,'si.itemID'=>$itemid));
@@ -136,30 +136,27 @@ public function ContactFormData(){
 		$password = md5($this->input->post('password'));
 		//check if email and password exists
 		$user = $this->generic->GetData('users', array('userEmail' => $email, 'userPass' => $password, 'userStatus' => 1));
-		$this->session->set_userdata('loginData', $user[0]);
 		if ($user) {
+			// Security: regenerate session ID to prevent session fixation attacks
+			$this->session->sess_regenerate(TRUE);
 			$this->session->set_userdata('loginData', $user[0]);
 			//check if user is admin or vendor
 			if ($user[0]['userType'] == 1) {
 				//if admin then redirect to admin dashboard
 				redirect(base_url('admin-dashboard'));
 			} elseif ($user[0]['userType'] == 2) {
-				//get cpmpany details
+				//get company details
 				$companyDetails = $this->generic->GetData('companydetail', array('userId' => $user[0]['userID']));
 				$this->session->set_userdata('companyDetails', $companyDetails[0]);
 				//if vendor then redirect to vendor dashboard	
 				redirect(base_url('company-dashboard'));
 			} elseif ($user[0]['userType'] == 3) {
-				//if user then redirect to company manager dashboard	
+				//if manager then redirect to manager dashboard	
 				redirect(base_url('manager-dashboard'));
 			} elseif ($user[0]['userType'] == 4) {
-				//if user then redirect to user dashboard	
-				redirect(base_url('user-dashboard'));
+				//if normal user then redirect to home page	
+				redirect(base_url());
 			}
-			die('User Loged In');
-			//set session data
-			$this->session->set_userdata('loginData', $user[0]);
-			redirect(base_url('dashboard'));
 		} else {
 			$this->session->set_flashdata('error', 1);
 			redirect(base_url());
@@ -269,7 +266,7 @@ public function ContactFormData(){
 			$subject = 'Equip Manager - Account Verification';
 			$message = 'Your account has been created successfully. Your verification code is: ' . $authCode;
 			$this->send_email($email, $subject, $message);
-			redirect(base_url('verify-account?auth=' . $authTocken));
+			redirect(base_url('verify-account?auth=' . $authTocken . '&userID=' . $maxUserId[0]['result']));
 		}
 	}
 
@@ -277,10 +274,11 @@ public function ContactFormData(){
 
 	public function VerifyAccount()
 	{
-		$authcode = $_GET['auth'];
+		$authcode   = $this->input->get('auth', TRUE);
+		$userIDParam = $this->input->get('userID', TRUE);
 		//check if auth code exists
-		$checkAuth = $this->generic->GetData('userauth', array('authTocken' => $authcode, 'userID' => $_GET['userID'], 'authStatus' => 0));
-		if ($checkAuth || isset($_GET['forgot'])) {
+		$checkAuth = $this->generic->GetData('userauth', array('authTocken' => $authcode, 'userID' => $userIDParam, 'authStatus' => 0));
+		if ($checkAuth || $this->input->get('forgot') !== NULL) {
 			// die('a');
 			$this->load->view('verifyAccount');
 		} else {
@@ -291,11 +289,12 @@ public function ContactFormData(){
 	public function VerifyAccountData()
 	{
 
-		$authCode = $this->input->post('password');
+		$authCode    = $this->input->post('password');
 		$forgotcheck = $this->input->post('forgotcheck');
-		$authTocken = $_GET['auth'];
+		$authTocken  = $this->input->get('auth', TRUE);
+		$userIDParam = $this->input->get('userID', TRUE);
 		//get user by auth token
-		$userAuth = $this->generic->GetData('userauth', array('authTocken' => $authTocken, 'userID' => $_GET['userID']));
+		$userAuth = $this->generic->GetData('userauth', array('authTocken' => $authTocken, 'userID' => $userIDParam));
 		if ($userAuth) {
 			// die($authCode );
 			if ($userAuth[0]['authCode'] == $authCode) {
@@ -304,7 +303,7 @@ public function ContactFormData(){
 				$this->generic->Update('users', array('userID' => $userAuth[0]['userID']), array('userStatus' => 1));
 				if ($forgotcheck == '1') {
 					// if forgot password then update user password
-					redirect(base_url('reset-password?auth=' . $authTocken . '&userID=' . $_GET['userID']));
+					redirect(base_url('reset-password?auth=' . $authTocken . '&userID=' . $userIDParam));
 				} else {
 					$this->session->set_flashdata('successRegister', 1);
 					redirect(base_url());
@@ -313,9 +312,9 @@ public function ContactFormData(){
 				$this->session->set_flashdata('error', 1);
 				if ($forgotcheck == '1') {
 					// die('forgot');
-					redirect(base_url('verify-account?auth=' . $authTocken . '&userID=' . $_GET['userID'] . '&forgot=1'));
+					redirect(base_url('verify-account?auth=' . $authTocken . '&userID=' . $userIDParam . '&forgot=1'));
 				} else {
-					redirect(base_url('verify-account?auth=' . $authTocken . '&userID=' . $_GET['userID']));
+					redirect(base_url('verify-account?auth=' . $authTocken . '&userID=' . $userIDParam));
 				}
 			}
 		} else {
@@ -324,9 +323,10 @@ public function ContactFormData(){
 	}
 	public function resendVerificationEmail()
 	{
-		$authTocken = $_GET['auth'];
+		$authTocken  = $this->input->get('auth', TRUE);
+		$userIDParam = $this->input->get('userID', TRUE);
 		//get user by auth token
-		$userAuth = $this->generic->GetData('userauth', array('authTocken' => $authTocken, 'userID' => $_GET['userID']));
+		$userAuth = $this->generic->GetData('userauth', array('authTocken' => $authTocken, 'userID' => $userIDParam));
 		//get user data
 		$userdata = $this->generic->GetData('users', array('userID' => $userAuth[0]['userID']));
 		//generate new authcode
@@ -340,10 +340,10 @@ public function ContactFormData(){
 			$message = 'Your account has been created successfully. Your verification code is: ' . $userAuth[0]['authCode'];
 			$this->send_email($email, $subject, $message);
 			$this->session->set_flashdata('newcodeSend', 1);
-			if (isset($_GET['forgot'])) {
-				redirect(base_url('verify-account?auth=' . $authTocken . '&userID=' . $_GET['userID'] . '&forgot=1'));
+			if ($this->input->get('forgot') !== NULL) {
+				redirect(base_url('verify-account?auth=' . $authTocken . '&userID=' . $userIDParam . '&forgot=1'));
 			} else {
-				redirect(base_url('verify-account?auth=' . $authTocken . '&userID=' . $_GET['userID']));
+				redirect(base_url('verify-account?auth=' . $authTocken . '&userID=' . $userIDParam));
 			}
 		} else {
 			redirect(base_url('register'));
@@ -380,8 +380,8 @@ public function ContactFormData(){
 
 	public function resetPassword()
 	{
-		$authTocken = $_GET['auth'];
-		$userID = $_GET['userID'];
+		$authTocken = $this->input->get('auth', TRUE);
+		$userID     = $this->input->get('userID', TRUE);
 		//get user by auth token
 		$userAuth = $this->generic->GetData('userauth', array('authTocken' => $authTocken, 'userID' => $userID));
 		if ($userAuth) {
@@ -392,8 +392,8 @@ public function ContactFormData(){
 	}
 	public function resetPasswordData()
 	{
-		$authTocken = $_GET['auth'];
-		$userID = $_GET['userID'];
+		$authTocken = $this->input->get('auth', TRUE);
+		$userID     = $this->input->get('userID', TRUE);
 		//get user by auth token
 		$userAuth = $this->generic->GetData('userauth', array('authTocken' => $authTocken, 'userID' => $userID));
 		if ($userAuth) {
@@ -420,14 +420,52 @@ public function ContactFormData(){
 	// <!-- redirect to dashboard -->
 	// <!-- ============================================================== -->
 
+	public function userDashboard()
+	{
+		$login_data = $this->session->userdata('loginData');
+		if (!$login_data || !isset($login_data['userType'])) {
+			redirect('login');
+			return;
+		}
+		switch ($login_data['userType']) {
+			case 4: // normal user
+				$this->load->view('dashboards/user_dashboard');
+				break;
+			case 2: // company admin
+				$this->load->view('dashboards/companydashboard');
+				break;
+			case 3: // manager
+				$this->load->view('dashboards/managerdashboard');
+				break;
+			default:
+				redirect('login');
+		}
+	}
 
-
+	public function userSettings()
+	{
+		//check if user is normal user (type 4)
+		if ($this->session->userdata('loginData')['userType'] == 4) {
+			$this->load->view('dashboards/settings');
+		} else {
+			redirect(base_url());
+		}
+	}
 
 	public function companyDashboard()
 	{
 		//check if user is vendor
 		if ($this->session->userdata('loginData')['userType'] == 2) {
 			$this->load->view('dashboards/companydashboard');
+		} else {
+			redirect(base_url());
+		}
+	}
+	public function managerDashboard()
+	{
+		//check if user is manager (type 3)
+		if ($this->session->userdata('loginData')['userType'] == 3) {
+			$this->load->view('dashboards/managerdashboard');
 		} else {
 			redirect(base_url());
 		}
@@ -447,10 +485,15 @@ public function ContactFormData(){
 	// <!-- ============================================================== -->
 	public function LogOut()
 	{
+		// Get userType before unsetting loginData
+		$login_data = $this->session->userdata('loginData');
 		$this->session->unset_userdata('loginData');
-		if ($this->session->userdata('loginData')['userType'] == 2) {
+		
+		// If company admin, also unset company details
+		if ($login_data && isset($login_data['userType']) && $login_data['userType'] == 2) {
 			$this->session->unset_userdata('companyDetails');
 		}
-		redirect(base_url());
+		
+		redirect('login');
 	}
 }

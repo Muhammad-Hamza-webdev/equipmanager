@@ -53,6 +53,20 @@
  *
  * NOTE: If you change these, also change the error_reporting() code below
  */
+
+/*
+ *---------------------------------------------------------------
+ * LOAD ENVIRONMENT VARIABLES
+ *---------------------------------------------------------------
+ *
+ * Sensitive credentials (Stripe keys, DB password, JWT secret)
+ * are stored in phpenv.php which is gitignored and never committed.
+ * Copy phpenv.php.example → phpenv.php and fill in real values.
+ */
+if (file_exists(__DIR__ . '/phpenv.php')) {
+    require_once __DIR__ . '/phpenv.php';
+}
+
 	define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
 
 /*

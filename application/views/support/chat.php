@@ -98,12 +98,12 @@
 										if ($allTickets) {
 											foreach ($allTickets as $tickets) {
 										?>
-												<a href="<?= base_url('ticket-chat?ticketID=' . $tickets['supportTicketID']) ?> " class="list-group-item <?= ($tickets['supportTicketStatus'] == 2) ? 'active' : '' ?> <?= ($tickets['supportTicketID'] == $_GET['ticketID']) ? 'active' : '' ?>">
+													<a href="<?= base_url('ticket-chat?ticketID=' . (int)$tickets['supportTicketID']) ?> " class="list-group-item <?= ($tickets['supportTicketStatus'] == 2) ? 'active' : '' ?> <?= ($tickets['supportTicketID'] == (int)$this->input->get('ticketID')) ? 'active' : '' ?>">
 													<div class="d-flex">
 
 														<div class="flex-grow-1 ms-2">
-															<h6 class="mb-0 chat-title"><?= $tickets['supportCat'] ?></h6>
-															<p class="mb-0 chat-msg"><?= $tickets['supportSubject']  ?></p>
+														<h6 class="mb-0 chat-title"><?= h($tickets['supportCat']) ?></h6>
+														<p class="mb-0 chat-msg"><?= h($tickets['supportSubject']) ?></p>
 														</div>
 														<div class="chat-time"><?php
 																				$ts = $tickets['supportTicketTimeStamp'] ?? '';
@@ -136,7 +136,7 @@
 					<div class="chat-toggle-btn"><i class='bx bx-menu-alt-left'></i>
 					</div>
 					<div>
-						<h4 class="mb-1 font-weight-bold"><?= $cTicketData[0]['supportSubject'] ?></h4>
+						<h4 class="mb-1 font-weight-bold"><?= h($cTicketData[0]['supportSubject']) ?></h4>
 						<div class="list-inline d-sm-flex mb-0 d-none"> <a href="javascript:;" class="list-inline-item d-flex align-items-center text-secondary">
 								<strong style="color:black">Status : &ensp; </strong> <span id="Ticketstatus">
 									<?php
@@ -177,7 +177,7 @@
 																						// format: "Jan 1, 2020 2:37 PM" — fallback to original if parse fails
 																						echo $t ? date('M j, Y g:i A', $t) : $ts;
 																						?></p>
-											<p class="chat-right-msg"><?= $chat['chatText'] ?></p>
+											<p class="chat-right-msg"><?= h($chat['chatText']) ?></p>
 										</div>
 									</div>
 								</div>
@@ -198,7 +198,7 @@
 																		$t = strtotime($ts);
 																		echo $t ? date('M j, Y g:i A', $t) : $ts;
 																		?></p>
-											<p class="chat-left-msg"><?= $chat['chatText'] ?></p>
+											<p class="chat-left-msg"><?= h($chat['chatText']) ?></p>
 										</div>
 									</div>
 								</div>
@@ -220,7 +220,7 @@
 							class="form-control" id="new-chat" name="new-chat" placeholder="Type a message">
 						</div>
 					</div>
-					<div class="chat-footer-menu"> <a  href="javascript:sendchat(<?= $this->session->userdata('loginData')['userID']  ?>,<?= $_GET['ticketID'] ?>)"
+<div class="chat-footer-menu"> <a  href="javascript:sendchat(<?= (int)$this->session->userdata('loginData')['userID']  ?>,<?= (int)$this->input->get('ticketID') ?>)"
 					
 					<?php 
 								if($cTicketData[0]['supportTicketStatus']==3){
@@ -282,7 +282,7 @@
 			$('#new-chat').keypress(function(e) {
 				if (e.which == 13) { // 13 is Enter key code
 					e.preventDefault(); // Prevent default Enter behavior
-					sendchat(<?= $this->session->userdata('loginData')['userID'] ?>, <?= $_GET['ticketID'] ?>);
+					sendchat(<?= (int)$this->session->userdata('loginData')['userID'] ?>, <?= (int)$this->input->get('ticketID') ?>);
 				}
 			});
 		});
@@ -305,7 +305,8 @@
 					data: {
 						userID: userID,
 						ticketID: ticketID,
-						chat: chatmsg
+						chat: chatmsg,
+						'<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
 					}, // Data to send
 
 					success: function(response) {
@@ -330,7 +331,7 @@
 						}
 						toastr.success('Message Sent!');
 						$('#new-chat').val('');
-					},
+					}
 				});
 			}
 

@@ -68,6 +68,8 @@
                                 </div>
                                 <hr />
                                 <form action="<?= base_url('add-super-category') ?>" method="post" enctype="multipart/form-data">
+                                    <!-- SECURITY FIX: Add CSRF token to form -->
+                                    <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
 
                                     <div class="row mb-3">
                                         <label
